@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+
 import "./LandingPage.css";
 import Sidebar from "./components/Sidebar";
 

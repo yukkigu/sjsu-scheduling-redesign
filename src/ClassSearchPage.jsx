@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import "./ClassSearchPage.css";
+import { mockClasses } from "./data/mockClasses";
+
 import Sidebar from "./components/Sidebar";
 import CustomDropdown from "./components/CustomDropdown";
+
+import CircleIcon from "@mui/icons-material/Circle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import ErrorIcon from "@mui/icons-material/Error";
 
 export default function ClassSearchPage() {
   const navigate = useNavigate();
@@ -19,6 +26,10 @@ export default function ClassSearchPage() {
   const [classTimeValue, setClassTimeValue] = useState("");
 
   const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
+
+  const [searchResults, setSearchResults] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [expandedCourseId, setExpandedCourseId] = useState(null);
 
   const termOptions = ["Spring 2025", "Fall 2026", "Summer 2026", "Spring 2027"];
 
@@ -51,6 +62,19 @@ export default function ClassSearchPage() {
   const modeOfInstructionOptions = ["Select", "Lecture", "Seminar", "Discussion", "Research"];
 
   const classTimeTypeOptions = ["Select", "Before", "After", "At Exactly"];
+
+  const handleSearch = () => {
+    const filtered = mockClasses.filter((course) => {
+      const matchesTerm = !term || course.term === term;
+      const matchesSubject = !subject || course.subject === subject;
+      const matchesCareer = !courseCareer || course.career === courseCareer;
+
+      return matchesTerm && matchesSubject && matchesCareer;
+    });
+
+    setSearchResults(filtered);
+    setHasSearched(true);
+  };
 
   return (
     <div className="class-search-page">
@@ -207,8 +231,183 @@ export default function ClassSearchPage() {
             </div>
 
             <div className="class-search-search-row">
-              <button className="class-search-search-btn">Search</button>
+              <button className="class-search-search-btn" onClick={handleSearch}>
+                Search
+              </button>
             </div>
+
+            {hasSearched && (
+              <div className="class-results-section">
+                <div className="class-results-section">
+                  <div className="class-results-header">
+                    <div className="class-results-legend">
+                      <span className="legend-item">
+                        <CircleIcon className="legend-icon open" />
+                        Open
+                      </span>
+
+                      <span className="legend-item">
+                        <CancelIcon className="legend-icon closed" />
+                        Closed
+                      </span>
+
+                      <span className="legend-item">
+                        <ErrorIcon className="legend-icon waitlist" />
+                        Wait List
+                      </span>
+                    </div>
+
+                    <div className="class-results-columns">
+                      <span># students enrolled / Total # spots / # waitlisting</span>
+                      <span>Status</span>
+                    </div>
+                  </div>
+
+                  <div className="class-results-list">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((course) => {
+                        const isExpanded = expandedCourseId === course.id;
+
+                        return (
+                          <div key={course.id} className="class-result-item">
+                            <button
+                              className={`class-result-row ${isExpanded ? "expanded" : ""}`}
+                              onClick={() => setExpandedCourseId(isExpanded ? null : course.id)}>
+                              <div className="class-result-main">
+                                <span className="class-result-caret">{isExpanded ? "⌃" : "⌄"}</span>
+                                <span className="class-result-title">
+                                  {course.code} - {course.title}
+                                </span>
+                              </div>
+
+                              <div className="class-result-count">
+                                {course.enrolled}/{course.total}/{course.waitlist}
+                              </div>
+
+                              <div
+                                className={`class-result-status ${course.status
+                                  .toLowerCase()
+                                  .replace(" ", "-")}`}>
+                                <span className="status-icon">
+                                  {course.status === "Open" && <CircleIcon />}
+                                  {course.status === "Closed" && <CancelIcon />}
+                                  {course.status === "Wait List" && <ErrorIcon />}
+                                </span>
+                                {course.status}
+                              </div>
+                            </button>
+
+                            {isExpanded && (
+                              <div className="class-result-details">
+                                <div className="class-result-details-grid">
+                                  <div className="class-result-details-left">
+                                    <div className="detail-row">
+                                      <span className="detail-label">Class Number</span>
+                                      <span>{course.classNumber}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Session</span>
+                                      <span>{course.session}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Units</span>
+                                      <span>{course.units}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Instruction Mode</span>
+                                      <span>{course.instructionMode}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Career</span>
+                                      <span>{course.career}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Grading</span>
+                                      <span>{course.grading}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Dates</span>
+                                      <span>{course.dates}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Times</span>
+                                      <span>{course.times}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Location</span>
+                                      <span>{course.location}</span>
+                                    </div>
+                                    <div className="detail-row">
+                                      <span className="detail-label">Instructor</span>
+                                      <span>{course.instructor}</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="class-result-details-right">
+                                    <div className="detail-block">
+                                      <div className="detail-block-title">Description:</div>
+                                      <p>{course.description}</p>
+                                    </div>
+
+                                    <div className="detail-block-row">
+                                      <div className="detail-block">
+                                        <div className="detail-block-title">Prerequisite(s):</div>
+                                        <ul>
+                                          {course.prerequisites.map((item) => (
+                                            <li key={item}>{item}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+
+                                      <div className="detail-block availability-block">
+                                        <div className="detail-block-title">
+                                          Class Availability:
+                                        </div>
+                                        <ul>
+                                          <li>
+                                            Class capacity: {course.classAvailability.classCapacity}
+                                          </li>
+                                          <li>
+                                            Total enrolled: {course.classAvailability.totalEnrolled}
+                                          </li>
+                                          <li>
+                                            Available seats:{" "}
+                                            {course.classAvailability.availableSeats}
+                                          </li>
+                                          <li>
+                                            Waitlist capacity:{" "}
+                                            {course.classAvailability.waitlistCapacity}
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                    <div className="detail-block">
+                                      <div className="detail-block-title">
+                                        Allowed Declared Major:
+                                      </div>
+                                      <p>{course.allowedMajors.join(", ")}.</p>
+                                      <p>Or Instructor consent.</p>
+                                    </div>
+
+                                    <div className="class-result-actions">
+                                      <button className="add-class-btn">Add Class</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="class-results-empty">
+                        No classes found for the selected filters.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="class-search-tabs">
               {[1, 2, 3].map((num) => (
