@@ -1,0 +1,420 @@
+.class-search-page {
+  min-height: 100vh;
+  background: #dbe4f2;
+  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.class-search-header {
+  background: white;
+  border-bottom: 1px solid #cfd7e4;
+  padding: 8px 30px;
+}
+
+.class-search-header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.class-search-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.class-search-logo-main {
+  font-size: 32px;
+  font-weight: bold;
+  color: #6f8fbe;
+}
+
+.class-search-logo-sub {
+  color: #6f8fbe;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.class-search-layout {
+  display: flex;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.class-search-content {
+  flex: 1;
+  padding: 22px 28px 28px;
+}
+
+.class-search-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 24px 24px 28px;
+  min-height: 900px;
+}
+
+.class-search-back-btn {
+  background: #ececec;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 28px;
+}
+
+.class-search-back-btn:hover {
+  background: #d9d9d9;
+}
+
+.class-search-top-form {
+  padding: 8px 38px 0;
+}
+
+.class-search-form-grid {
+  display: grid;
+  grid-template-columns: 170px minmax(220px, 1fr) 170px minmax(220px, 1fr);
+  column-gap: 26px;
+  row-gap: 28px;
+  align-items: center;
+}
+
+.class-search-label {
+  font-size: 16px;
+}
+
+.class-search-select,
+.class-search-small-select,
+.class-search-wide-select,
+.class-search-time-select {
+  background: #ececec;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.class-search-course-filter-wrap {
+  display: grid;
+  grid-template-columns: 120px 160px;
+  gap: 16px;
+  align-items: start;
+}
+
+.class-search-course-input {
+  height: 40px;
+  border: 1px solid #8f8f8f;
+  background: white;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.class-search-criteria-section {
+  margin: 30px 10px 0;
+}
+
+.class-search-criteria-toggle {
+  width: 100%;
+  background: #b8bfd4;
+  border: none;
+  border-radius: 14px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.class-search-criteria-toggle.open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.class-search-criteria-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.class-search-criteria-body {
+  background: #b8bfd4;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+  padding: 26px 34px 34px;
+}
+
+.class-search-criteria-row {
+  display: grid;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.class-search-criteria-row:last-child {
+  margin-bottom: 0;
+}
+
+.class-search-days-row {
+  grid-template-columns: 180px repeat(5, minmax(110px, 1fr));
+  column-gap: 18px;
+}
+
+.class-search-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+/* hide default */
+.checkbox input {
+  display: none;
+}
+
+/* custom box */
+.checkmark {
+  width: 17px;
+  height: 17px;
+  border: 2px solid #4f5f7f;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+}
+
+/* checked state */
+.checkbox input:checked + .checkmark {
+  background: #6f86b3;
+  border-color: #6f86b3;
+}
+
+/* check icon */
+.checkbox input:checked + .checkmark::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.class-search-criteria-label {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.class-search-mode-time-row {
+  grid-template-columns: 180px minmax(260px, 390px) 130px 160px 190px;
+  column-gap: 18px;
+}
+
+.class-search-time-label {
+  justify-self: end;
+}
+
+.class-search-instructor-row {
+  grid-template-columns: 180px minmax(260px, 390px);
+  column-gap: 18px;
+}
+
+.class-search-instructor-input {
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.class-search-search-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 10px 0;
+}
+
+.class-search-search-btn {
+  background: #ececec;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 26px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.class-search-search-btn:hover {
+  background: #d9d9d9;
+}
+
+.class-search-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  margin-top: 34px;
+  padding-left: 22px;
+}
+
+.class-search-tabs button:hover {
+  background: #e0e0e0;
+}
+
+.class-search-tabs button {
+  min-width: 190px;
+  background: #f6f6f6;
+  border: 1px solid #b8bfd4;
+  border-bottom: none;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  padding: 14px 20px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.class-search-tabs button.active {
+  background: #b8bfd4;
+  font-weight: 600;
+}
+
+.class-search-schedule-shell {
+  background: #b8bfd4;
+  border-radius: 6px;
+  padding: 18px 18px 20px;
+}
+
+.class-search-schedule-table-wrap {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.class-search-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.class-search-schedule-table thead {
+  background: #ffffff;
+}
+
+.class-search-schedule-table th,
+.class-search-schedule-table td {
+  border-bottom: 1px solid #dde2ee;
+  padding: 14px 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.class-search-schedule-table th {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.class-search-schedule-table th:first-child,
+.class-search-schedule-table td:first-child {
+  width: 90px;
+}
+.class-search-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 0 20px;
+}
+
+.actions-left,
+.actions-right {
+  display: flex;
+  gap: 16px;
+}
+
+.action-btn {
+  min-width: 160px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #f6f6f6;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #e0e0e0;
+}
+
+.class-search-actions button:hover {
+  background: #e0e0e0;
+}
+
+/* Dropdown */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.custom-dropdown-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.custom-dropdown-trigger {
+  width: 100%;
+  min-height: 35px;
+  border: none;
+  border-radius: 10px;
+  background: #f6f6f6;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.custom-dropdown-arrow {
+  font-size: 34px;
+  color: #5b5b5b;
+  transition: transform 0.2s ease;
+}
+
+.custom-dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  width: 100%;
+  background: #f6f6f6;
+  border-radius: 15px;
+  overflow-y: auto;
+  max-height: 220px;
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.custom-dropdown-option {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 7px 10px;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.custom-dropdown-option:hover,
+.custom-dropdown-option.selected {
+  background: #e0e0e0;
+}
