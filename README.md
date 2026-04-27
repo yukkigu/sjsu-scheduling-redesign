@@ -1,16 +1,47 @@
-# React + Vite
+# SJSU Scheduling System Redesign
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project implements a custom redesign of SJSU's scheduling system.
 
-Currently, two official plugins are available:
+# Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+# Main Changes:
+### Visuals/UI:
+  - Inspired by Google Drive's pastel and minimalistic designs
+  - Clean background color with card items
+  - Rounded corners
+### Color scheme:
+  - Changed from a dull yellowish white to pastel blue as the main background color and white items
+  - Variants of blue are used
+  - Reasoning: Different shades of blue were chosen because it's part of the SJSU school color
+### Functionalities/Features:
+  - Grouped Class Search, Add/Drop Class, MyScheduler, Browse Class --> Class Search 
+      - Removed redundant usage of different tabs (Class Search can do all scheduling modifications)
+  - Removed new window/system for MyScheduler --> Schedule can be adjusted and viewed in Class Schedule or at the bottom of Class Search (for quick class modification visibility)
+  - Expanded classes show all necessary information (no longer need to open a new page to see class details)
+  - Add/Drop classes are instantly reflected in the Calendar (easy to detect class conflicts)
+  - Quick Checkout/Enrollment of classes (one click)
+  - Ability to create several schedules to compare courses/schedules 
 
-## React Compiler
+This project mainly focuses on the design aspects of the SJSU scheduling system, so many other tab features may not be available.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# Project Structure
+```
+sjsu-scheduling-redesign/
+├── public/
+├── src/
+│   ├── components/                // reusable components (e.g., Sidebar, CustomDropdown)
+│   ├── data/
+│   │   └── mockClasses.js
+│   ├── ClassSearchPage.jsx
+│   ├── ClassSearchPage.css
+│   ├── LandingPage.jsx
+│   ├── LandingPage.css
+│   ├── App.jsx
+│   └── main.jsx
+├── package.json
+├── package-lock.json
+├── vite.config.js
+├── eslint.config.js
+└── README.md
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
