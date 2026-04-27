@@ -43,5 +43,4 @@ sjsu-scheduling-redesign/
 ├── vite.config.js
 ├── eslint.config.js
 └── README.md
-
 ```
