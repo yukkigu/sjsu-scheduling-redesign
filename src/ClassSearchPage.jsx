@@ -10,11 +10,12 @@ import CustomDropdown from "./components/CustomDropdown";
 import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ErrorIcon from "@mui/icons-material/Error";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 export default function ClassSearchPage() {
   const navigate = useNavigate();
   const [showAdditionalCriteria, setShowAdditionalCriteria] = useState(false);
-  const [activeSchedule, setActiveSchedule] = useState(1);
 
   const [term, setTerm] = useState("Spring 2025");
   const [subject, setSubject] = useState("");
@@ -25,11 +26,19 @@ export default function ClassSearchPage() {
   const [classTimeType, setClassTimeType] = useState("Select");
   const [classTimeValue, setClassTimeValue] = useState("");
 
-  const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
-
   const [searchResults, setSearchResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+
   const [expandedCourseId, setExpandedCourseId] = useState(null);
+
+  const [activeSchedule, setActiveSchedule] = useState(1);
+  const [scheduledClasses, setScheduledClasses] = useState({
+    1: [],
+    2: [],
+    3: [],
+  });
+
+  const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
   const termOptions = ["Spring 2025", "Fall 2026", "Summer 2026", "Spring 2027"];
 
@@ -53,6 +62,7 @@ export default function ClassSearchPage() {
   const courseFilterOptions = ["Select", "Contains", "Is Exactly"];
 
   const courseCareerOptions = [
+    "Select",
     "Undergraduate",
     "Graduate",
     "Postbaccalaureate",
@@ -62,6 +72,104 @@ export default function ClassSearchPage() {
   const modeOfInstructionOptions = ["Select", "Lecture", "Seminar", "Discussion", "Research"];
 
   const classTimeTypeOptions = ["Select", "Before", "After", "At Exactly"];
+  const DAY_TO_COLUMN = {
+    Monday: 0,
+    Tuesday: 1,
+    Wednesday: 2,
+    Thursday: 3,
+    Friday: 4,
+  };
+
+  const SHORT_DAY_MAP = {
+    Mo: "Monday",
+    Tu: "Tuesday",
+    We: "Wednesday",
+    Th: "Thursday",
+    Fr: "Friday",
+  };
+
+  const parseMeetingDays = (timesString) => {
+    if (!timesString) return [];
+    const dayPart = timesString.split(" ")[0];
+    const matches = dayPart.match(/Mo|Tu|We|Th|Fr/g) || [];
+    return matches.map((d) => SHORT_DAY_MAP[d]);
+  };
+
+  const to24HourMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+
+    const normalized = timeStr.trim().toLowerCase();
+    const match = normalized.match(/(\d{1,2}):(\d{2})(am|pm)/);
+
+    if (!match) return 0;
+
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const meridiem = match[3];
+
+    if (meridiem === "pm" && hours !== 12) hours += 12;
+    if (meridiem === "am" && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+  };
+
+  const parseTimeRange = (timesString) => {
+    if (!timesString) return { startMinutes: 0, endMinutes: 0 };
+
+    const parts = timesString.split(" ");
+    const timePart = parts.slice(1).join(" ");
+    const [startRaw, endRaw] = timePart.split("-").map((s) => s.trim());
+
+    return {
+      startMinutes: to24HourMinutes(startRaw),
+      endMinutes: to24HourMinutes(endRaw),
+    };
+  };
+
+  // calendar absolute positioning constants for overlaying courses on the schedule table
+  const calendarStartHour = 6;
+  const calendarEndHour = 22;
+  const hourHeight = 62; // px per hour row
+  const timeColumnWidth = 90;
+  const dayColumnCount = 5; // Monday to Friday
+
+  const scheduledEvents = scheduledClasses[activeSchedule].flatMap((course) => {
+    const meetingDays = parseMeetingDays(course.times);
+    const { startMinutes, endMinutes } = parseTimeRange(course.times);
+
+    return meetingDays.map((day) => ({
+      id: `${course.id}-${day}`,
+      course,
+      day,
+      column: DAY_TO_COLUMN[day],
+      startMinutes,
+      endMinutes,
+    }));
+  });
+
+  const isCourseAdded = (courseId) => {
+    return scheduledClasses[activeSchedule].some((c) => c.id === courseId);
+  };
+
+  const handleToggleCourse = (course) => {
+    const alreadyAdded = isCourseAdded(course.id);
+
+    setScheduledClasses((prev) => {
+      const currentSchedule = prev[activeSchedule];
+
+      if (alreadyAdded) {
+        return {
+          ...prev,
+          [activeSchedule]: currentSchedule.filter((c) => c.id !== course.id),
+        };
+      }
+
+      return {
+        ...prev,
+        [activeSchedule]: [...currentSchedule, course],
+      };
+    });
+  };
 
   const handleSearch = () => {
     const filtered = mockClasses.filter((course) => {
@@ -274,7 +382,9 @@ export default function ClassSearchPage() {
                               className={`class-result-row ${isExpanded ? "expanded" : ""}`}
                               onClick={() => setExpandedCourseId(isExpanded ? null : course.id)}>
                               <div className="class-result-main">
-                                <span className="class-result-caret">{isExpanded ? "⌃" : "⌄"}</span>
+                                <span className="class-result-caret">
+                                  {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                </span>
                                 <span className="class-result-title">
                                   {course.code} - {course.title}
                                 </span>
@@ -285,15 +395,23 @@ export default function ClassSearchPage() {
                               </div>
 
                               <div
-                                className={`class-result-status ${course.status
-                                  .toLowerCase()
-                                  .replace(" ", "-")}`}>
+                                className={`class-result-status ${
+                                  isCourseAdded(course.id)
+                                    ? "added"
+                                    : course.status.toLowerCase().replace(" ", "-")
+                                }`}>
                                 <span className="status-icon">
-                                  {course.status === "Open" && <CircleIcon />}
-                                  {course.status === "Closed" && <CancelIcon />}
-                                  {course.status === "Wait List" && <ErrorIcon />}
+                                  {isCourseAdded(course.id) ? (
+                                    <CircleIcon />
+                                  ) : course.status === "Open" ? (
+                                    <CircleIcon />
+                                  ) : course.status === "Closed" ? (
+                                    <CancelIcon />
+                                  ) : (
+                                    <ErrorIcon />
+                                  )}
                                 </span>
-                                {course.status}
+                                {isCourseAdded(course.id) ? "Added" : course.status}
                               </div>
                             </button>
 
@@ -390,7 +508,14 @@ export default function ClassSearchPage() {
                                     </div>
 
                                     <div className="class-result-actions">
-                                      <button className="add-class-btn">Add Class</button>
+                                      <button
+                                        className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleToggleCourse(course);
+                                        }}>
+                                        {isCourseAdded(course.id) ? "Remove Class" : "Add Class"}
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
@@ -421,31 +546,58 @@ export default function ClassSearchPage() {
             </div>
 
             <div className="class-search-schedule-shell">
-              <div className="class-search-schedule-table-wrap">
-                <table className="class-search-schedule-table">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Monday</th>
-                      <th>Tuesday</th>
-                      <th>Wednesday</th>
-                      <th>Thursday</th>
-                      <th>Friday</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Array.from({ length: 16 }, (_, i) => 7 + i).map((t) => (
-                      <tr key={t}>
-                        <td>{t}:00</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                      </tr>
+              <div className="calendar-shell">
+                <div className="calendar-grid">
+                  <div className="calendar-header-row">
+                    <div className="calendar-time-header"></div>
+                    {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
+                      <div key={day} className="calendar-day-header">
+                        {day}
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+
+                  {Array.from({ length: calendarEndHour - calendarStartHour + 1 }, (_, i) => {
+                    const hour = calendarStartHour + i;
+                    return (
+                      <div key={hour} className="calendar-hour-row">
+                        <div className="calendar-time-label">
+                          {String(hour).padStart(2, "0")}:00
+                        </div>
+                        {Array.from({ length: dayColumnCount }, (_, col) => (
+                          <div key={col} className="calendar-cell"></div>
+                        ))}
+                      </div>
+                    );
+                  })}
+
+                  <div className="calendar-events-layer">
+                    {scheduledEvents.map((event) => {
+                      const top = ((event.startMinutes - calendarStartHour * 60) / 60) * hourHeight;
+
+                      const height = ((event.endMinutes - event.startMinutes) / 60) * hourHeight;
+
+                      const left = `calc(${timeColumnWidth}px + (${event.column} * ((100% - ${timeColumnWidth}px) / ${dayColumnCount})))`;
+                      const width = `calc((100% - ${timeColumnWidth}px) / ${dayColumnCount}`;
+
+                      return (
+                        <div
+                          key={event.id}
+                          className="calendar-event-card"
+                          style={{
+                            top: `${top + 38}px`, // offset for header row
+                            left,
+                            width,
+                            height: `${height}px`,
+                          }}>
+                          <div className="calendar-event-code">{event.course.code}</div>
+                          <div className="calendar-event-instructor">{event.course.instructor}</div>
+                          <div className="calendar-event-room">{event.course.location}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               <div className="class-search-actions">

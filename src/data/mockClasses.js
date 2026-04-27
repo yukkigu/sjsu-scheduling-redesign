@@ -157,7 +157,7 @@ export const mockClasses = [
         instructionMode: "In Person",
         grading: "Letter Grading",
         dates: "01/27/2026 - 05/16/2026",
-        times: "TuTh 10:00AM - 11:15AM",
+        times: "MoWe 2:00PM - 3:15PM",
         location: "Sweeney Hall 205",
         instructor: "Dr. Jane Doe",
         description: "Technical writing course.",
