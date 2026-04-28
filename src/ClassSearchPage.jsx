@@ -13,6 +13,9 @@ import ErrorIcon from "@mui/icons-material/Error";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
+import ClassFullModal from "./ClassFullModal";
+import PrereqModal from "./PrereqModal";
+
 export default function ClassSearchPage() {
   const navigate = useNavigate();
   const [showAdditionalCriteria, setShowAdditionalCriteria] = useState(false);
@@ -36,6 +39,16 @@ export default function ClassSearchPage() {
     1: [],
     2: [],
     3: [],
+  });
+
+  const [classFullModal, setClassFullModal] = useState({
+    isOpen: false,
+    course: null,
+  });
+
+  const [prereqModal, setPrereqModal] = useState({
+    isOpen: false,
+    course: null,
   });
 
   const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
@@ -151,7 +164,7 @@ export default function ClassSearchPage() {
     return scheduledClasses[activeSchedule].some((c) => c.id === courseId);
   };
 
-  const handleToggleCourse = (course) => {
+  {/* const handleToggleCourse = (course) => {
     const alreadyAdded = isCourseAdded(course.id);
 
     setScheduledClasses((prev) => {
@@ -169,6 +182,38 @@ export default function ClassSearchPage() {
         [activeSchedule]: [...currentSchedule, course],
       };
     });
+  }; */}
+
+  const handleToggleCourse = (course) => {
+    const alreadyAdded = isCourseAdded(course.id);
+    
+    if (alreadyAdded) {
+      setScheduledClasses((prev) => ({
+        ...prev,
+        [activeSchedule]: prev[activeSchedule].filter((c) => c.id !== course.id),
+      }));
+      return;
+    }
+
+    if (course.career != "Graduate") {
+      setPrereqModal({ isOpen: true, course });
+      return;
+    }
+
+    if (course.prereqNotMet) {
+      setPrereqModal({ isOpen: true, course });
+      return;
+    }
+
+    if (course.status === "Closed" || course.status === "Wait List") {
+      setClassFullModal({ isOpen: true, course });
+      return;
+    }
+
+    setScheduledClasses((prev) => ({
+      ...prev,
+      [activeSchedule]: [...prev[activeSchedule], course],
+    }));
   };
 
   const handleSearch = () => {
@@ -186,6 +231,35 @@ export default function ClassSearchPage() {
 
   return (
     <div className="class-search-page">
+
+      <ClassFullModal
+        isOpen={classFullModal.isOpen}
+        onClose={() => setClassFullModal({ isOpen: false, course: null })}
+        course={classFullModal.course}
+      />
+
+      <PrereqModal
+        isOpen={prereqModal.isOpen}
+        onClose={() => setPrereqModal({ isOpen: false, course: null })}
+        course={prereqModal.course}
+      />
+
+      {/* <div style={{ display: "flex", gap: "10px", padding: "10px 24px", background: "#fff3cd", borderBottom: "1px solid #ffc107" }}>
+        <span style={{ fontSize: "12px", color: "#856404", alignSelf: "center" }}> Test modals:</span>
+        <button
+            style={{ fontSize: "12px", padding: "6px 14px", borderRadius: "6px", border: "1px solid #c85f5f", background: "#fff", cursor: "pointer", color: "#c85f5f" }}
+            onClick={() => setClassFullModal({ isOpen: true, course: { code: "CS 225", title: "Topics in ML" }})}>
+            Class Full Modal
+        </button>
+        <button
+            style={{ fontSize: "12px", padding: "6px 14px", borderRadius: "6px", border: "1px solid #c1ab5c", background: "#fff", cursor: "pointer", color: "#856404" }}
+            onClick={() => setPrereqModal({ isOpen: true, course: { code: "CS 228", title: "Biometric Security with AI", prerequisites: ["CS 171", "Instructor Consent"] }})}>
+            Prereq Modal
+        </button>
+      </div> */}
+
+
+
       <div className="class-search-header">
         <div className="class-search-header-inner">
           <div className="class-search-logo">
@@ -508,14 +582,16 @@ export default function ClassSearchPage() {
                                     </div>
 
                                     <div className="class-result-actions">
-                                      <button
-                                        className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleToggleCourse(course);
-                                        }}>
-                                        {isCourseAdded(course.id) ? "Remove Class" : "Add Class"}
+                                      {course.status !== "Closed" && (
+                                        <button
+                                          className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleToggleCourse(course);
+                                          }}>
+                                          {isCourseAdded(course.id) ? "Remove Class" : "Add Class"}
                                       </button>
+                                      )}
                                     </div>
                                   </div>
                                 </div>

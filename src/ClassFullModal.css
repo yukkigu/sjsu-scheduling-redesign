@@ -1,0 +1,9 @@
+@import "./modal-shared.css";
+
+.modal-icon--waitlist {
+    color: #c1ab5c !important;
+}
+
+.modal-icon--success {
+    color: #5a9971 !important;
+}
