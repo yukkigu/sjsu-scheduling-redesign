@@ -1,0 +1,137 @@
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 40, 60, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+
+    animation: modal-fade-in 0.18s ease both;
+}
+
+@keyframes modal-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-container {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 36px 32px 28px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 80px 40px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111827;
+
+    animation: modal-slide-up 0.2s ease both;
+}
+
+@keyframes modal-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-icon-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-icon {
+    font-size: 48px !important;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+.modal-body {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: #3b3b3b;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.modal-actions--split {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+}
+
+.modal-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 36px;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    transition: banckground 0.18s ease, transform 0.1s ease;
+}
+
+.modal-btn:active {
+    transform: scale(0.97);
+}
+
+.modal-btn--primary {
+    background: #6f86b3;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.modal-btn--primary:hover {
+    background: #5c739f;
+}
+
+.modal-btn--secondary {
+    background: #ececec;
+    color: #1f1f1f;
+    font-weight: 600;
+}
+
+.modal-btn--secondary:hover {
+    background: #d9d9d9;
+}
+
+@media (max-width: 480px) {
+    .modal-container {
+        margin: 0 16px;
+        padding: 28px 20px 22px;
+    }
+
+    .modal-actions--split {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .modal-actions--split .modal-btn {
+        width: 100%;
+    }
+}
+
