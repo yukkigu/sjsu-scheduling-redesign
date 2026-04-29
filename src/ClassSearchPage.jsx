@@ -10,27 +10,29 @@ import ErrorIcon from "@mui/icons-material/Error";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-import Topbar from "./components/Topbar";
-import Sidebar from "./components/Sidebar";
-import CustomDropdown from "./components/CustomDropdown";
-import WaitlistModal from "./components/WaitlistModal";
-import PrereqModal from "./components/PrereqModal";
+import Topbar from "./components/Navbars/Topbar";
+import Sidebar from "./components/Navbars/Sidebar";
+import CustomDropdown from "./components/Dropdown/CustomDropdown";
+import WaitlistModal from "./components/Modals/WaitlistModal";
+import PrereqModal from "./components/Modals/PrereqModal";
 
 export default function ClassSearchPage() {
   const navigate = useNavigate();
-  const [showAdditionalCriteria, setShowAdditionalCriteria] = useState(false);
 
+  // ------------------- search filters states -------------------
   const [term, setTerm] = useState("Spring 2026");
   const [subject, setSubject] = useState("");
   const [courseFilterType, setCourseFilterType] = useState("Contains");
   const [courseCareer, setCourseCareer] = useState("");
 
+  // additional criteria states
+  const [showAdditionalCriteria, setShowAdditionalCriteria] = useState(false);
   const [modeOfInstruction, setModeOfInstruction] = useState("");
   const [classTimeType, setClassTimeType] = useState("Select");
   const [classTimeValue, setClassTimeValue] = useState("");
-
   const [searchResults, setSearchResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+  // --------------------------------------------------------------
 
   const [expandedCourseId, setExpandedCourseId] = useState(null);
 
@@ -41,6 +43,7 @@ export default function ClassSearchPage() {
     3: [],
   });
 
+  // ------------------- modal states -------------------
   const [waitlistModal, setWaitlistModal] = useState({
     isOpen: false,
     course: null,
@@ -50,6 +53,7 @@ export default function ClassSearchPage() {
     isOpen: false,
     course: null,
   });
+  // -----------------------------------------------------
 
   const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 

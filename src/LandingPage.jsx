@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 
 import "./LandingPage.css";
-import Sidebar from "./components/Sidebar";
-import Topbar from "./components/Topbar";
+import Sidebar from "./components/Navbars/Sidebar";
+import Topbar from "./components/Navbars/Topbar";
 
 import MailIcon from "@mui/icons-material/Mail";
 import LockIcon from "@mui/icons-material/Lock";
