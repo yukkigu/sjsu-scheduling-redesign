@@ -20,7 +20,7 @@ export default function ClassSearchPage() {
   const navigate = useNavigate();
   const [showAdditionalCriteria, setShowAdditionalCriteria] = useState(false);
 
-  const [term, setTerm] = useState("Spring 2025");
+  const [term, setTerm] = useState("Spring 2026");
   const [subject, setSubject] = useState("");
   const [courseFilterType, setCourseFilterType] = useState("Contains");
   const [courseCareer, setCourseCareer] = useState("");
@@ -53,7 +53,7 @@ export default function ClassSearchPage() {
 
   const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
-  const termOptions = ["Spring 2025", "Fall 2026", "Summer 2026", "Spring 2027"];
+  const termOptions = ["Spring 2026", "Fall 2026", "Summer 2026", "Spring 2027"];
 
   const subjectOptions = [
     "Art",
@@ -222,20 +222,6 @@ export default function ClassSearchPage() {
         onClose={() => setPrereqModal({ isOpen: false, course: null })}
         course={prereqModal.course}
       />
-
-      {/* <div style={{ display: "flex", gap: "10px", padding: "10px 24px", background: "#fff3cd", borderBottom: "1px solid #ffc107" }}>
-        <span style={{ fontSize: "12px", color: "#856404", alignSelf: "center" }}> Test modals:</span>
-        <button
-            style={{ fontSize: "12px", padding: "6px 14px", borderRadius: "6px", border: "1px solid #c85f5f", background: "#fff", cursor: "pointer", color: "#c85f5f" }}
-            onClick={() => setClassFullModal({ isOpen: true, course: { code: "CS 225", title: "Topics in ML" }})}>
-            Class Full Modal
-        </button>
-        <button
-            style={{ fontSize: "12px", padding: "6px 14px", borderRadius: "6px", border: "1px solid #c1ab5c", background: "#fff", cursor: "pointer", color: "#856404" }}
-            onClick={() => setPrereqModal({ isOpen: true, course: { code: "CS 228", title: "Biometric Security with AI", prerequisites: ["CS 171", "Instructor Consent"] }})}>
-            Prereq Modal
-        </button>
-      </div> */}
 
       <div className="class-search-header">
         <div className="class-search-header-inner">
