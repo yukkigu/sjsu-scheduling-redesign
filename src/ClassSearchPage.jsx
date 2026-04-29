@@ -4,15 +4,15 @@ import { useNavigate } from "react-router-dom";
 import "./ClassSearchPage.css";
 import { mockClasses } from "./data/mockClasses";
 
-import Sidebar from "./components/Sidebar";
-import CustomDropdown from "./components/CustomDropdown";
-
 import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ErrorIcon from "@mui/icons-material/Error";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
+import Topbar from "./components/Topbar";
+import Sidebar from "./components/Sidebar";
+import CustomDropdown from "./components/CustomDropdown";
 import WaitlistModal from "./components/WaitlistModal";
 import PrereqModal from "./components/PrereqModal";
 
@@ -223,17 +223,7 @@ export default function ClassSearchPage() {
         course={prereqModal.course}
       />
 
-      <div className="class-search-header">
-        <div className="class-search-header-inner">
-          <div className="class-search-logo">
-            <div className="class-search-logo-main">SJSU</div>
-            <div className="class-search-logo-sub">
-              <div>SAN JOSE STATE</div>
-              <div>UNIVERSITY</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Topbar />
 
       <div className="class-search-layout">
         <Sidebar

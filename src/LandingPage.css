@@ -5,48 +5,6 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.landing-header {
-  background: #ffffff;
-  border-bottom: 1px solid #d5dceb;
-  padding: 10px 34px;
-}
-
-.landing-header-inner {
-  max-width: 1440px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.landing-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.landing-logo-main {
-  font-size: 36px;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #6f86b3;
-}
-
-.landing-logo-sub {
-  color: #6f86b3;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.1;
-}
-
-.landing-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-}
-
 .landing-layout {
   display: flex;
   max-width: 1440px;

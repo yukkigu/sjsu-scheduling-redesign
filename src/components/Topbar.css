@@ -1,0 +1,39 @@
+.topbar-header {
+  background: white;
+  border-bottom: 1px solid #cfd7e4;
+  padding: 8px 30px;
+}
+
+.topbar-header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-logo-text {
+  font-size: 32px;
+  font-weight: bold;
+  color: #6f8fbe;
+}
+
+.topbar-logo-subtext {
+  color: #6f8fbe;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: #40526d;
+}

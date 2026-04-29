@@ -2,12 +2,12 @@ import { useNavigate } from "react-router-dom";
 
 import "./LandingPage.css";
 import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
 
 import MailIcon from "@mui/icons-material/Mail";
 import LockIcon from "@mui/icons-material/Lock";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import PersonIcon from "@mui/icons-material/Person";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
@@ -49,29 +49,13 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page">
-      <header className="landing-header">
-        <div className="landing-header-inner">
-          <div className="landing-logo">
-            <div className="landing-logo-main">SJSU</div>
-            <div className="landing-logo-sub">
-              <div>SAN JOSE STATE</div>
-              <div>UNIVERSITY</div>
-            </div>
-          </div>
-
-          <div className="landing-user">
-            <PersonIcon />
-            <span>John Smith</span>
-          </div>
-        </div>
-      </header>
-
+      <Topbar />
       <main className="landing-layout">
         <Sidebar activeItem="Student Center" />
 
         <section className="landing-content">
           <div className="landing-shell">
-            <h1 className="landing-title">John Smith’s Student Center</h1>
+            <h1 className="landing-title">John Smith's Student Center</h1>
 
             <div className="landing-status-row">
               {statusItems.map((item) => (

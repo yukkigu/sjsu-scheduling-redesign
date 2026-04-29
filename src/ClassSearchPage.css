@@ -5,35 +5,6 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.class-search-header {
-  background: white;
-  border-bottom: 1px solid #cfd7e4;
-  padding: 8px 30px;
-}
-
-.class-search-header-inner {
-  max-width: 1440px;
-  margin: 0 auto;
-}
-
-.class-search-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.class-search-logo-main {
-  font-size: 32px;
-  font-weight: bold;
-  color: #6f8fbe;
-}
-
-.class-search-logo-sub {
-  color: #6f8fbe;
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .class-search-layout {
   display: flex;
   max-width: 1440px;

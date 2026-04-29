@@ -26,7 +26,7 @@ export default function Sidebar({
     "Logout",
   ];
 
-  const enrollmentSubtabs = ["Enrollment Date", "Class Search", "Class Schedule"];
+  const enrollmentSubtabs = ["Enrollment Date", "Class Search", "MySchedule"];
 
   const handleNavClick = (item) => {
     if (item === "Student Center") {
