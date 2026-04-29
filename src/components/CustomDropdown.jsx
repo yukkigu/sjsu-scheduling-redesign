@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+import "./CustomDropdown.css";
+
 export default function CustomDropdown({
   label,
   options,

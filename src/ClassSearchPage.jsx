@@ -13,8 +13,8 @@ import ErrorIcon from "@mui/icons-material/Error";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-import ClassFullModal from "./ClassFullModal";
-import PrereqModal from "./PrereqModal";
+import WaitlistModal from "./components/WaitlistModal";
+import PrereqModal from "./components/PrereqModal";
 
 export default function ClassSearchPage() {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export default function ClassSearchPage() {
     3: [],
   });
 
-  const [classFullModal, setClassFullModal] = useState({
+  const [waitlistModal, setWaitlistModal] = useState({
     isOpen: false,
     course: null,
   });
@@ -164,29 +164,9 @@ export default function ClassSearchPage() {
     return scheduledClasses[activeSchedule].some((c) => c.id === courseId);
   };
 
-  {/* const handleToggleCourse = (course) => {
-    const alreadyAdded = isCourseAdded(course.id);
-
-    setScheduledClasses((prev) => {
-      const currentSchedule = prev[activeSchedule];
-
-      if (alreadyAdded) {
-        return {
-          ...prev,
-          [activeSchedule]: currentSchedule.filter((c) => c.id !== course.id),
-        };
-      }
-
-      return {
-        ...prev,
-        [activeSchedule]: [...currentSchedule, course],
-      };
-    });
-  }; */}
-
   const handleToggleCourse = (course) => {
     const alreadyAdded = isCourseAdded(course.id);
-    
+
     if (alreadyAdded) {
       setScheduledClasses((prev) => ({
         ...prev,
@@ -206,7 +186,7 @@ export default function ClassSearchPage() {
     }
 
     if (course.status === "Closed" || course.status === "Wait List") {
-      setClassFullModal({ isOpen: true, course });
+      setWaitlistModal({ isOpen: true, course });
       return;
     }
 
@@ -231,11 +211,10 @@ export default function ClassSearchPage() {
 
   return (
     <div className="class-search-page">
-
-      <ClassFullModal
-        isOpen={classFullModal.isOpen}
-        onClose={() => setClassFullModal({ isOpen: false, course: null })}
-        course={classFullModal.course}
+      <WaitlistModal
+        isOpen={waitlistModal.isOpen}
+        onClose={() => setWaitlistModal({ isOpen: false, course: null })}
+        course={waitlistModal.course}
       />
 
       <PrereqModal
@@ -257,8 +236,6 @@ export default function ClassSearchPage() {
             Prereq Modal
         </button>
       </div> */}
-
-
 
       <div className="class-search-header">
         <div className="class-search-header-inner">
@@ -590,7 +567,7 @@ export default function ClassSearchPage() {
                                             handleToggleCourse(course);
                                           }}>
                                           {isCourseAdded(course.id) ? "Remove Class" : "Add Class"}
-                                      </button>
+                                        </button>
                                       )}
                                     </div>
                                   </div>
