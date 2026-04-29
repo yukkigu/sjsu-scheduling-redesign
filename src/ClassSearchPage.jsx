@@ -15,6 +15,8 @@ import Sidebar from "./components/Navbars/Sidebar";
 import CustomDropdown from "./components/Dropdown/CustomDropdown";
 import WaitlistModal from "./components/Modals/WaitlistModal";
 import PrereqModal from "./components/Modals/PrereqModal";
+// import DaysCard from "./components/AdditionalCriteria/days-card";
+import AdditionalCriteria from "./components/AdditionalCriteria/AdditionalCriteria";
 
 export default function ClassSearchPage() {
   const navigate = useNavigate();
@@ -26,12 +28,27 @@ export default function ClassSearchPage() {
   const [courseCareer, setCourseCareer] = useState("");
 
   // additional criteria states
+  const modeOfInstructionOptions = ["Select", "Lecture", "Seminar", "Discussion", "Research"];
+  const classTimeTypeOptions = ["Select", "Before", "After", "At Exactly"];
+  const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
+
   const [showAdditionalCriteria, setShowAdditionalCriteria] = useState(false);
   const [modeOfInstruction, setModeOfInstruction] = useState("");
   const [classTimeType, setClassTimeType] = useState("Select");
   const [classTimeValue, setClassTimeValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const additionalCriteriaProps = {
+    modeOfInstructionOptions,
+    modeOfInstruction,
+    setModeOfInstruction,
+    classTimeTypeOptions,
+    classTimeType,
+    setClassTimeType,
+    times,
+    classTimeValue,
+    setClassTimeValue,
+  };
   // --------------------------------------------------------------
 
   const [expandedCourseId, setExpandedCourseId] = useState(null);
@@ -54,8 +71,6 @@ export default function ClassSearchPage() {
     course: null,
   });
   // -----------------------------------------------------
-
-  const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
   const termOptions = ["Spring 2026", "Fall 2026", "Summer 2026", "Spring 2027"];
 
@@ -86,9 +101,6 @@ export default function ClassSearchPage() {
     "Non-credit Extension",
   ];
 
-  const modeOfInstructionOptions = ["Select", "Lecture", "Seminar", "Discussion", "Research"];
-
-  const classTimeTypeOptions = ["Select", "Before", "After", "At Exactly"];
   const DAY_TO_COLUMN = {
     Monday: 0,
     Tuesday: 1,
@@ -291,82 +303,7 @@ export default function ClassSearchPage() {
                 <span>Additional Search Criteria</span>
               </button>
 
-              {showAdditionalCriteria && (
-                <div className="class-search-criteria-body">
-                  <div className="class-search-criteria-row class-search-days-row">
-                    <div className="class-search-criteria-label">Days of the Week</div>
-
-                    <label className="class-search-checkbox-item">
-                      <label className="checkbox">
-                        <input type="checkbox" />
-                        <span className="checkmark"></span>
-                        <span>Monday</span>
-                      </label>
-                    </label>
-                    <label className="class-search-checkbox-item">
-                      <label className="checkbox">
-                        <input type="checkbox" />
-                        <span className="checkmark"></span>
-                        <span>Tuesday</span>
-                      </label>
-                    </label>
-                    <label className="class-search-checkbox-item">
-                      <label className="checkbox">
-                        <input type="checkbox" />
-                        <span className="checkmark"></span>
-                        <span>Wednesday</span>
-                      </label>
-                    </label>
-                    <label className="class-search-checkbox-item">
-                      <label className="checkbox">
-                        <input type="checkbox" />
-                        <span className="checkmark"></span>
-                        <span>Thursday</span>
-                      </label>
-                    </label>
-                    <label className="class-search-checkbox-item">
-                      <label className="checkbox">
-                        <input type="checkbox" />
-                        <span className="checkmark"></span>
-                        <span>Friday</span>
-                      </label>
-                    </label>
-                  </div>
-
-                  <div className="class-search-criteria-row class-search-mode-time-row">
-                    <label className="class-search-criteria-label">Mode of Instruction</label>
-                    <CustomDropdown
-                      options={modeOfInstructionOptions}
-                      value={modeOfInstruction}
-                      onChange={setModeOfInstruction}
-                      placeholder="Select Mode of Instruction"
-                    />
-
-                    <label className="class-search-criteria-label class-search-time-label">
-                      Class Time
-                    </label>
-
-                    <CustomDropdown
-                      options={classTimeTypeOptions}
-                      value={classTimeType}
-                      onChange={setClassTimeType}
-                      placeholder="Select"
-                    />
-
-                    <CustomDropdown
-                      options={times}
-                      value={classTimeValue}
-                      onChange={setClassTimeValue}
-                      placeholder="Select class time"
-                    />
-                  </div>
-
-                  <div className="class-search-criteria-row class-search-instructor-row">
-                    <label className="class-search-criteria-label">Instructor Last Name</label>
-                    <input className="class-search-instructor-input" placeholder="Search..." />
-                  </div>
-                </div>
-              )}
+              {showAdditionalCriteria && <AdditionalCriteria {...additionalCriteriaProps} />}
             </div>
 
             <div className="class-search-search-row">
@@ -611,7 +548,7 @@ export default function ClassSearchPage() {
                       const height = ((event.endMinutes - event.startMinutes) / 60) * hourHeight;
 
                       const left = `calc(${timeColumnWidth}px + (${event.column} * ((100% - ${timeColumnWidth}px) / ${dayColumnCount})))`;
-                      const width = `calc((100% - ${timeColumnWidth}px) / ${dayColumnCount}`;
+                      const width = `calc((100% - ${timeColumnWidth}px) / ${dayColumnCount})`;
 
                       return (
                         <div

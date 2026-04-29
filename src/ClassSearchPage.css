@@ -43,8 +43,8 @@
 
 .class-search-form-grid {
   display: grid;
-  grid-template-columns: 170px minmax(220px, 1fr) 170px minmax(220px, 1fr);
-  column-gap: 26px;
+  grid-template-columns: 170px minmax(180px, 1fr) 170px minmax(180px, 1fr);
+  column-gap: 20px;
   row-gap: 28px;
   align-items: center;
 }
@@ -128,54 +128,6 @@
 .class-search-days-row {
   grid-template-columns: 180px repeat(5, minmax(110px, 1fr));
   column-gap: 18px;
-}
-
-.class-search-checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-}
-
-.checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-}
-
-/* hide default */
-.checkbox input {
-  display: none;
-}
-
-/* custom box */
-.checkmark {
-  width: 17px;
-  height: 17px;
-  border: 2px solid #4f5f7f;
-  border-radius: 4px;
-  display: inline-block;
-  position: relative;
-}
-
-/* checked state */
-.checkbox input:checked + .checkmark {
-  background: #6f86b3;
-  border-color: #6f86b3;
-}
-
-/* check icon */
-.checkbox input:checked + .checkmark::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
 }
 
 .class-search-criteria-label {
