@@ -77,7 +77,7 @@ export default function WaitlistModal({ isOpen, onClose, course }) {
             Cancel
           </button>
           <button className="modal-btn modal-btn--primary" onClick={handleAddToWaitList}>
-            Add to Wait List
+            Join Wait List
           </button>
         </div>
       </div>

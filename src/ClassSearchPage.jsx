@@ -613,7 +613,14 @@ export default function ClassSearchPage() {
                         return (
                           <div
                             key={event.id}
-                            className={`calendar-event-card ${event.hasConflict ? "calendar-event-card--conflict" : event.isEnrolled ? "calendar-event-card--enrolled" : ""}`}
+                            className={`calendar-event-card 
+                              ${
+                                event.isEnrolled
+                                  ? "calendar-event-card--enrolled"
+                                  : event.hasConflict
+                                    ? "calendar-event-card--conflict"
+                                    : ""
+                              }`}
                             style={{
                               top: `${top}px`,
                               left,

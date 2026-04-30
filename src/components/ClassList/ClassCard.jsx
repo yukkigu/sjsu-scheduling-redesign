@@ -132,20 +132,14 @@ export default function ClassCard({
               </div>
 
               <div className="class-result-actions">
-                {course.status !== "Closed" && (
+                {!isEnrolled && course.status !== "Closed" && (
                   <button
-                    className={`add-class-btn ${
-                      isEnrolled ? "drop" : isCourseAdded(course.id) ? "remove" : ""
-                    }`}
+                    className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleCourse(course);
                     }}>
-                    {isEnrolled
-                      ? "Drop Class"
-                      : isCourseAdded(course.id)
-                        ? "Remove Class"
-                        : "Add Class"}
+                    {isCourseAdded(course.id) ? "Remove from Schedule" : "Add to Schedule"}
                   </button>
                 )}
               </div>
