@@ -17,18 +17,23 @@ export default function ClassCard({
   handleToggleCourse,
   isCourseEnrolled,
   getCourseDisplayStatus,
+  handleDropCourse,
 
   variant = "search",
   showCheckbox = false,
   isSelected = false,
   onToggleSelect,
 }) {
-  const displayStatus = getCourseDisplayStatus(course.id);
-  const isEnrolled = displayStatus === "Enrolled";
+  const addedOrEnrolledStatus = getCourseDisplayStatus(course.id);
+  const displayStatus =
+    variant === "schedule"
+      ? addedOrEnrolledStatus === "Enrolled"
+        ? "Enrolled"
+        : course.status
+      : addedOrEnrolledStatus || course.status;
 
-  const statusClass = displayStatus
-    ? displayStatus.toLowerCase()
-    : course.status.toLowerCase().replace(" ", "-");
+  const isEnrolled = displayStatus === "Enrolled";
+  const statusClass = displayStatus.toLowerCase().replace(" ", "-");
 
   return (
     <div className={`class-result-item class-result-item--${variant}`}>
@@ -70,21 +75,23 @@ export default function ClassCard({
                 <CheckCircle />
               ) : displayStatus === "Added" ? (
                 <Check />
-              ) : course.status === "Open" ? (
+              ) : displayStatus === "Open" ? (
                 <CircleIcon />
-              ) : course.status === "Closed" ? (
+              ) : displayStatus === "Closed" ? (
                 <CancelIcon />
               ) : (
                 <ErrorIcon />
               )}
             </span>
-            {displayStatus || course.status}
+            {displayStatus}
           </div>
         </button>
       </div>
 
       {isExpanded && (
-        <div className={`class-result-details class-result-details--${variant}`}>
+        <div
+          className={`class-result-details class-result-details--${variant}
+            ${isEnrolled ? "class-result-details--enrolled" : ""}`}>
           <div className="class-result-details-grid">
             <div className="class-result-details-left">
               <ClassDetailItem label="Course Code" value={course.code} />
@@ -132,7 +139,8 @@ export default function ClassCard({
               </div>
 
               <div className="class-result-actions">
-                {!isEnrolled && course.status !== "Closed" && (
+                {/* Search list button */}
+                {variant === "search" && !isEnrolled && course.status !== "Closed" && (
                   <button
                     className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
                     onClick={(e) => {
@@ -140,6 +148,18 @@ export default function ClassCard({
                       handleToggleCourse(course);
                     }}>
                     {isCourseAdded(course.id) ? "Remove from Schedule" : "Add to Schedule"}
+                  </button>
+                )}
+
+                {/* Schedule list button (only for enrolled classes) */}
+                {variant === "schedule" && isEnrolled && (
+                  <button
+                    className="add-class-btn drop"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDropCourse?.(course);
+                    }}>
+                    Drop Course
                   </button>
                 )}
               </div>

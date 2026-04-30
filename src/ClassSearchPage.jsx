@@ -7,6 +7,7 @@ import { mockClasses } from "./data/mockClasses";
 import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ErrorIcon from "@mui/icons-material/Error";
+
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
@@ -17,6 +18,7 @@ import WaitlistModal from "./components/Modals/WaitlistModal";
 import PrereqModal from "./components/Modals/PrereqModal";
 import EnrollSuccessModal from "./components/Modals/EnrollSuccessModal";
 import ClassConflictModal from "./components/Modals/ClassConflictModal";
+import DropConfirmModal from "./components/Modals/DropConfirmModal";
 
 import AdditionalCriteria from "./components/AdditionalCriteria/AdditionalCriteria";
 import ClassCard from "./components/ClassList/ClassCard";
@@ -90,6 +92,11 @@ export default function ClassSearchPage() {
   const [classConflictModal, setClassConflictModal] = useState({
     isOpen: false,
     conflictingCourses: [],
+  });
+
+  const [dropConfirmModal, setDropConfirmModal] = useState({
+    isOpen: false,
+    course: null,
   });
 
   // -----------------------------------------------------
@@ -306,30 +313,59 @@ export default function ClassSearchPage() {
     return Array.from(conflicts.values());
   };
 
-  const handleDropSelected = () => {
+  const handleRemoveSelected = () => {
+    const removableIds = scheduledClasses[activeSchedule]
+      .filter((course) => selectedCourseIds.includes(course.id) && !isCourseEnrolled(course.id))
+      .map((course) => course.id);
+
+    if (removableIds.length === 0) return;
+
     setScheduledClasses((prev) => ({
       ...prev,
-      [activeSchedule]: prev[activeSchedule].filter((c) => !selectedCourseIds.includes(c.id)),
+      [activeSchedule]: prev[activeSchedule].filter((c) => !removableIds.includes(c.id)),
     }));
+
+    setSelectedCourseIds((prev) => prev.filter((id) => !removableIds.includes(id)));
+    setExpandedScheduledCourseId(null);
+  };
+  const performDropCourse = (course) => {
+    if (!course) return;
+
     setEnrolledClasses((prev) => ({
       ...prev,
-      [activeSchedule]: prev[activeSchedule].filter((c) => !selectedCourseIds.includes(c.id)),
+      [activeSchedule]: prev[activeSchedule].filter((c) => c.id !== course.id),
     }));
-    setSelectedCourseIds([]);
+
+    setExpandedScheduledCourseId((prev) => (prev === course.id ? null : prev));
+    setExpandedCourseId((prev) => (prev === course.id ? null : prev));
+    setSelectedCourseIds((prev) => prev.filter((id) => id !== course.id));
   };
 
-  const handleDropAll = () => {
-    setScheduledClasses((prev) => ({ ...prev, [activeSchedule]: [] }));
-    setEnrolledClasses((prev) => ({ ...prev, [activeSchedule]: [] }));
-    setSelectedCourseIds([]);
+  const handleDropCourse = (course) => {
+    setDropConfirmModal({
+      isOpen: true,
+      course,
+    });
   };
 
   const handleCheckoutSelected = () => {
     const toEnroll = scheduledClasses[activeSchedule].filter((c) =>
       selectedCourseIds.includes(c.id),
     );
+
     if (toEnroll.length === 0) return;
-    const conflictingCourses = getConflictingCourses(toEnroll);
+
+    const alreadyEnrolled = enrolledClasses[activeSchedule];
+
+    const coursesToCheck = [
+      ...alreadyEnrolled,
+      ...toEnroll.filter(
+        (course) => !alreadyEnrolled.some((enrolled) => enrolled.id === course.id),
+      ),
+    ];
+
+    const conflictingCourses = getConflictingCourses(coursesToCheck);
+
     if (conflictingCourses.length > 0) {
       setClassConflictModal({
         isOpen: true,
@@ -337,6 +373,7 @@ export default function ClassSearchPage() {
       });
       return;
     }
+
     setEnrolledClasses((prev) => ({
       ...prev,
       [activeSchedule]: [
@@ -344,14 +381,24 @@ export default function ClassSearchPage() {
         ...toEnroll,
       ],
     }));
+
     setSelectedCourseIds([]);
     setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll });
   };
 
   const handleCheckoutAll = () => {
-    const toEnroll = scheduledClasses[activeSchedule];
+    const toEnroll = scheduledClasses[activeSchedule].filter(
+      (course) => !isCourseEnrolled(course.id),
+    );
+
     if (toEnroll.length === 0) return;
-    const conflictingCourses = getConflictingCourses(toEnroll);
+
+    const alreadyEnrolled = enrolledClasses[activeSchedule];
+
+    const coursesToCheck = [...alreadyEnrolled, ...toEnroll];
+
+    const conflictingCourses = getConflictingCourses(coursesToCheck);
+
     if (conflictingCourses.length > 0) {
       setClassConflictModal({
         isOpen: true,
@@ -359,7 +406,12 @@ export default function ClassSearchPage() {
       });
       return;
     }
-    setEnrolledClasses((prev) => ({ ...prev, [activeSchedule]: toEnroll }));
+
+    setEnrolledClasses((prev) => ({
+      ...prev,
+      [activeSchedule]: [...prev[activeSchedule], ...toEnroll],
+    }));
+
     setSelectedCourseIds([]);
     setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll });
   };
@@ -382,6 +434,14 @@ export default function ClassSearchPage() {
     if (isCourseAdded(courseId)) return "Added";
     return null;
   };
+
+  const enrolledScheduledCourses = scheduledClasses[activeSchedule].filter((course) =>
+    isCourseEnrolled(course.id),
+  );
+
+  const addedScheduledCourses = scheduledClasses[activeSchedule].filter(
+    (course) => !isCourseEnrolled(course.id),
+  );
 
   return (
     <div className="class-search-page">
@@ -408,6 +468,16 @@ export default function ClassSearchPage() {
         isOpen={classConflictModal.isOpen}
         onClose={() => setClassConflictModal({ isOpen: false, conflictingCourses: [] })}
         conflictingCourses={classConflictModal.conflictingCourses}
+      />
+
+      <DropConfirmModal
+        isOpen={dropConfirmModal.isOpen}
+        onClose={() => setDropConfirmModal({ isOpen: false, course: null })}
+        courses={dropConfirmModal.course ? [dropConfirmModal.course] : []}
+        onConfirm={() => {
+          performDropCourse(dropConfirmModal.course);
+          setDropConfirmModal({ isOpen: false, course: null });
+        }}
       />
 
       <Topbar />
@@ -524,6 +594,7 @@ export default function ClassSearchPage() {
                             handleToggleCourse={handleToggleCourse}
                             isCourseEnrolled={isCourseEnrolled}
                             getCourseDisplayStatus={getCourseDisplayStatus}
+                            handleDropCourse={handleDropCourse}
                           />
                         );
                       })
@@ -551,27 +622,85 @@ export default function ClassSearchPage() {
             <div className="class-search-schedule-shell">
               {scheduledClasses[activeSchedule].length > 0 && (
                 <div className="schedule-course-list">
-                  {scheduledClasses[activeSchedule].map((course) => {
-                    const isEnrolled = isCourseEnrolled(course.id);
-                    const isSelected = selectedCourseIds.includes(course.id);
-                    const isExpanded = expandedScheduledCourseId === course.id;
-                    return (
-                      <ClassCard
-                        key={course.id}
-                        course={course}
-                        variant="schedule"
-                        isExpanded={isExpanded}
-                        onToggle={() => setExpandedScheduledCourseId(isExpanded ? null : course.id)}
-                        isCourseAdded={isCourseAdded}
-                        handleToggleCourse={handleToggleCourse}
-                        isCourseEnrolled={isCourseEnrolled}
-                        getCourseDisplayStatus={getCourseDisplayStatus}
-                        showCheckbox={true}
-                        isSelected={isSelected}
-                        onToggleSelect={handleToggleSelect}
-                      />
-                    );
-                  })}
+                  {enrolledScheduledCourses.length > 0 && (
+                    <>
+                      <div className="schedule-course-section-label">Enrolled Courses</div>
+                      {enrolledScheduledCourses.map((course) => {
+                        const isExpanded = expandedScheduledCourseId === course.id;
+
+                        return (
+                          <ClassCard
+                            key={course.id}
+                            course={course}
+                            variant="schedule"
+                            isExpanded={isExpanded}
+                            onToggle={() =>
+                              setExpandedScheduledCourseId(isExpanded ? null : course.id)
+                            }
+                            isCourseAdded={isCourseAdded}
+                            handleToggleCourse={handleToggleCourse}
+                            isCourseEnrolled={isCourseEnrolled}
+                            getCourseDisplayStatus={getCourseDisplayStatus}
+                            handleDropCourse={handleDropCourse}
+                            showCheckbox={false}
+                          />
+                        );
+                      })}
+                    </>
+                  )}
+                  {enrolledScheduledCourses.length > 0 && addedScheduledCourses.length > 0 && (
+                    <div className="schedule-course-divider"></div>
+                  )}
+
+                  {addedScheduledCourses.length > 0 && (
+                    <>
+                      <div className="schedule-course-section-label">Unenrolled Courses</div>
+                      <p className="class-search-helper-text">
+                        Select checkbox to enroll or remove classes.
+                      </p>
+                      {addedScheduledCourses.map((course) => {
+                        const isSelected = selectedCourseIds.includes(course.id);
+                        const isExpanded = expandedScheduledCourseId === course.id;
+
+                        return (
+                          <ClassCard
+                            key={course.id}
+                            course={course}
+                            variant="schedule"
+                            isExpanded={isExpanded}
+                            onToggle={() =>
+                              setExpandedScheduledCourseId(isExpanded ? null : course.id)
+                            }
+                            isCourseAdded={isCourseAdded}
+                            handleToggleCourse={handleToggleCourse}
+                            isCourseEnrolled={isCourseEnrolled}
+                            getCourseDisplayStatus={getCourseDisplayStatus}
+                            handleDropCourse={handleDropCourse}
+                            showCheckbox={true}
+                            isSelected={isSelected}
+                            onToggleSelect={handleToggleSelect}
+                          />
+                        );
+                      })}
+
+                      <div className="class-search-actions">
+                        <div className="actions-left">
+                          <button className="action-btn" onClick={handleRemoveSelected}>
+                            Remove Selected
+                          </button>
+                        </div>
+
+                        <div className="actions-right">
+                          <button className="action-btn" onClick={handleCheckoutSelected}>
+                            Enroll Selected
+                          </button>
+                          <button className="action-btn" onClick={handleCheckoutAll}>
+                            Enroll All
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -640,26 +769,6 @@ export default function ClassSearchPage() {
                       })}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="class-search-actions">
-                <div className="actions-left">
-                  <button className="action-btn" onClick={handleDropSelected}>
-                    Drop Selected
-                  </button>
-                  <button className="action-btn" onClick={handleDropAll}>
-                    Drop All
-                  </button>
-                </div>
-
-                <div className="actions-right">
-                  <button className="action-btn" onClick={handleCheckoutSelected}>
-                    Checkout Selected
-                  </button>
-                  <button className="action-btn" onClick={handleCheckoutAll}>
-                    Checkout All
-                  </button>
                 </div>
               </div>
             </div>

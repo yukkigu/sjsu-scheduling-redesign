@@ -195,6 +195,10 @@
   margin-left: 27px;
 }
 
+.class-result-details--enrolled {
+  margin-left: 0px;
+}
+
 .class-result-row--enrolled {
   background: #d5ddec;
   border-color: #9fb2d3;

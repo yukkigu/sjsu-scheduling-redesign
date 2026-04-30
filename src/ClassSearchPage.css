@@ -212,6 +212,22 @@
   padding: 18px 18px 20px;
 }
 
+.schedule-course-section-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #323a4e;
+  margin: 4px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.class-search-helper-text {
+  font-size: 15px;
+  font-style: italic;
+  color: #333;
+  padding-bottom: 12px;
+}
+
 .class-search-schedule-table-wrap {
   background: white;
   border-radius: 8px;
@@ -248,7 +264,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 24px;
+  margin: 24px 0;
   padding: 0 20px;
 }
 
@@ -353,6 +369,13 @@
   line-height: 1.25;
   color: #2a3a56;
   margin-top: 2px;
+}
+
+.schedule-course-divider {
+  height: 1px;
+  background: #8f99b3;
+  margin: 8px 0 18px;
+  opacity: 0.7;
 }
 
 .class-results-empty {
