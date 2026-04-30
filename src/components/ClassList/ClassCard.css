@@ -84,6 +84,14 @@
   color: #5a9971;
 }
 
+.class-result-status.waitlisted svg {
+  color: #7a6d3b;
+}
+
+.class-result-status.waitlisted {
+  color: #433a18;
+}
+
 .class-result-status.open svg,
 .legend-icon.open {
   color: #5a9971;
@@ -96,7 +104,7 @@
 
 .class-result-status.wait-list svg,
 .legend-icon.waitlist {
-  color: #c1ab5c;
+  color: #a18e48;
 }
 
 .class-result-status.added svg {
@@ -221,6 +229,32 @@
   bottom: 0;
   width: 7px;
   background: #4b6f58;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.class-result-row--waitlisted {
+  background: #f5eec9;
+  border-color: #d4c27a;
+}
+
+.class-result-row--waitlisted .class-result-title {
+  color: #6b5a1e;
+  font-weight: 700;
+}
+
+.class-result-row--waitlisted {
+  position: relative;
+}
+
+.class-result-row--waitlisted::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+  background: #a8975b;
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
 }

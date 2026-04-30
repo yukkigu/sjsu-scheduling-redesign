@@ -3,14 +3,10 @@ import "./WaitlistModal.css";
 import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-export default function WaitlistModal({ isOpen, onClose, course }) {
+export default function WaitlistModal({ isOpen, onClose, onConfirm, course }) {
   const [waitlisted, setWaitlisted] = useState(false);
 
   if (!isOpen) return null;
-
-  const handleAddToWaitList = () => {
-    setWaitlisted(true);
-  };
 
   const handleClose = () => {
     setWaitlisted(false);
@@ -76,7 +72,7 @@ export default function WaitlistModal({ isOpen, onClose, course }) {
           <button className="modal-btn modal-btn--secondary" onClick={handleClose}>
             Cancel
           </button>
-          <button className="modal-btn modal-btn--primary" onClick={handleAddToWaitList}>
+          <button className="modal-btn modal-btn--primary" onClick={onConfirm}>
             Join Wait List
           </button>
         </div>

@@ -66,6 +66,11 @@ export default function ClassSearchPage() {
     3: [],
   });
 
+  const [pendingWaitlistEnrollment, setPendingWaitlistEnrollment] = useState({
+    coursesToEnroll: [],
+    waitlistCourses: [],
+  });
+
   // ------------------- modal states -------------------
   const [waitlistModal, setWaitlistModal] = useState({
     isOpen: false,
@@ -78,6 +83,12 @@ export default function ClassSearchPage() {
   });
 
   const [enrolledClasses, setEnrolledClasses] = useState({
+    1: [],
+    2: [],
+    3: [],
+  });
+
+  const [waitlistedClasses, setWaitlistedClasses] = useState({
     1: [],
     2: [],
     3: [],
@@ -248,6 +259,9 @@ export default function ClassSearchPage() {
   const isCourseEnrolled = (courseId) =>
     enrolledClasses[activeSchedule].some((c) => c.id === courseId);
 
+  const isCourseWaitlisted = (courseId) =>
+    waitlistedClasses[activeSchedule].some((c) => c.id === courseId);
+
   const handleToggleCourse = (course) => {
     const alreadyAdded = isCourseAdded(course.id);
 
@@ -269,8 +283,7 @@ export default function ClassSearchPage() {
       return;
     }
 
-    if (course.status === "Closed" || course.status === "Wait List") {
-      setWaitlistModal({ isOpen: true, course });
+    if (course.status === "Closed") {
       return;
     }
 
@@ -328,10 +341,16 @@ export default function ClassSearchPage() {
     setSelectedCourseIds((prev) => prev.filter((id) => !removableIds.includes(id)));
     setExpandedScheduledCourseId(null);
   };
+
   const performDropCourse = (course) => {
     if (!course) return;
 
     setEnrolledClasses((prev) => ({
+      ...prev,
+      [activeSchedule]: prev[activeSchedule].filter((c) => c.id !== course.id),
+    }));
+
+    setWaitlistedClasses((prev) => ({
       ...prev,
       [activeSchedule]: prev[activeSchedule].filter((c) => c.id !== course.id),
     }));
@@ -349,23 +368,21 @@ export default function ClassSearchPage() {
   };
 
   const handleCheckoutSelected = () => {
-    const toEnroll = scheduledClasses[activeSchedule].filter((c) =>
-      selectedCourseIds.includes(c.id),
+    const toEnroll = scheduledClasses[activeSchedule].filter(
+      (c) =>
+        selectedCourseIds.includes(c.id) && !isCourseEnrolled(c.id) && !isCourseWaitlisted(c.id),
     );
 
     if (toEnroll.length === 0) return;
 
-    const alreadyEnrolled = enrolledClasses[activeSchedule];
-
-    const coursesToCheck = [
-      ...alreadyEnrolled,
-      ...toEnroll.filter(
-        (course) => !alreadyEnrolled.some((enrolled) => enrolled.id === course.id),
-      ),
+    const alreadyCommitted = [
+      ...enrolledClasses[activeSchedule],
+      ...waitlistedClasses[activeSchedule],
     ];
 
-    const conflictingCourses = getConflictingCourses(coursesToCheck);
+    const coursesToCheck = [...alreadyCommitted, ...toEnroll];
 
+    const conflictingCourses = getConflictingCourses(coursesToCheck);
     if (conflictingCourses.length > 0) {
       setClassConflictModal({
         isOpen: true,
@@ -374,31 +391,50 @@ export default function ClassSearchPage() {
       return;
     }
 
+    const waitlistCourses = toEnroll.filter((course) => course.status === "Wait List");
+
+    const regularCourses = toEnroll.filter((course) => course.status !== "Wait List");
+
+    if (waitlistCourses.length > 0) {
+      setPendingWaitlistEnrollment({
+        coursesToEnroll: regularCourses,
+        waitlistCourses,
+      });
+
+      setWaitlistModal({
+        isOpen: true,
+        course: waitlistCourses[0],
+      });
+      return;
+    }
+
     setEnrolledClasses((prev) => ({
       ...prev,
-      [activeSchedule]: [
-        ...prev[activeSchedule].filter((c) => !toEnroll.some((e) => e.id === c.id)),
-        ...toEnroll,
-      ],
+      [activeSchedule]: [...prev[activeSchedule], ...regularCourses],
     }));
 
     setSelectedCourseIds([]);
-    setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll });
+    setEnrollSuccessModal({
+      isOpen: true,
+      enrolledCourses: regularCourses,
+    });
   };
 
   const handleCheckoutAll = () => {
     const toEnroll = scheduledClasses[activeSchedule].filter(
-      (course) => !isCourseEnrolled(course.id),
+      (course) => !isCourseEnrolled(course.id) && !isCourseWaitlisted(course.id),
     );
 
     if (toEnroll.length === 0) return;
 
-    const alreadyEnrolled = enrolledClasses[activeSchedule];
+    const alreadyCommitted = [
+      ...enrolledClasses[activeSchedule],
+      ...waitlistedClasses[activeSchedule],
+    ];
 
-    const coursesToCheck = [...alreadyEnrolled, ...toEnroll];
+    const coursesToCheck = [...alreadyCommitted, ...toEnroll];
 
     const conflictingCourses = getConflictingCourses(coursesToCheck);
-
     if (conflictingCourses.length > 0) {
       setClassConflictModal({
         isOpen: true,
@@ -407,13 +443,71 @@ export default function ClassSearchPage() {
       return;
     }
 
+    const waitlistCourses = toEnroll.filter((course) => course.status === "Wait List");
+
+    const regularCourses = toEnroll.filter((course) => course.status !== "Wait List");
+
+    if (waitlistCourses.length > 0) {
+      setPendingWaitlistEnrollment({
+        coursesToEnroll: regularCourses,
+        waitlistCourses,
+      });
+
+      setWaitlistModal({
+        isOpen: true,
+        course: waitlistCourses[0],
+      });
+      return;
+    }
+
     setEnrolledClasses((prev) => ({
       ...prev,
-      [activeSchedule]: [...prev[activeSchedule], ...toEnroll],
+      [activeSchedule]: [...prev[activeSchedule], ...regularCourses],
     }));
 
     setSelectedCourseIds([]);
-    setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll });
+    setEnrollSuccessModal({
+      isOpen: true,
+      enrolledCourses: regularCourses,
+    });
+  };
+
+  const handleJoinWaitlistAndEnroll = () => {
+    const { coursesToEnroll, waitlistCourses } = pendingWaitlistEnrollment;
+
+    if (!coursesToEnroll.length && !waitlistCourses.length) return;
+
+    if (coursesToEnroll.length > 0) {
+      setEnrolledClasses((prev) => ({
+        ...prev,
+        [activeSchedule]: [
+          ...prev[activeSchedule].filter((c) => !coursesToEnroll.some((e) => e.id === c.id)),
+          ...coursesToEnroll,
+        ],
+      }));
+    }
+
+    if (waitlistCourses.length > 0) {
+      setWaitlistedClasses((prev) => ({
+        ...prev,
+        [activeSchedule]: [
+          ...prev[activeSchedule].filter((c) => !waitlistCourses.some((w) => w.id === c.id)),
+          ...waitlistCourses,
+        ],
+      }));
+    }
+
+    setSelectedCourseIds([]);
+    setEnrollSuccessModal({
+      isOpen: true,
+      enrolledCourses: coursesToEnroll,
+    });
+
+    setWaitlistModal({ isOpen: false, course: null });
+    setPendingWaitlistEnrollment({
+      coursesToEnroll: [],
+      waitlistCourses: [],
+    });
   };
 
   const handleSearch = () => {
@@ -431,6 +525,7 @@ export default function ClassSearchPage() {
 
   const getCourseDisplayStatus = (courseId) => {
     if (isCourseEnrolled(courseId)) return "Enrolled";
+    if (isCourseWaitlisted(courseId)) return "Waitlisted";
     if (isCourseAdded(courseId)) return "Added";
     return null;
   };
@@ -439,8 +534,12 @@ export default function ClassSearchPage() {
     isCourseEnrolled(course.id),
   );
 
+  const waitlistedScheduledCourses = scheduledClasses[activeSchedule].filter((course) =>
+    isCourseWaitlisted(course.id),
+  );
+
   const addedScheduledCourses = scheduledClasses[activeSchedule].filter(
-    (course) => !isCourseEnrolled(course.id),
+    (course) => !isCourseEnrolled(course.id) && !isCourseWaitlisted(course.id),
   );
 
   return (
@@ -448,7 +547,11 @@ export default function ClassSearchPage() {
       {/* Modals */}
       <WaitlistModal
         isOpen={waitlistModal.isOpen}
-        onClose={() => setWaitlistModal({ isOpen: false, course: null })}
+        onClose={() => {
+          setWaitlistModal({ isOpen: false, course: null });
+          setPendingWaitlistEnrollment({ coursesToEnroll: [], waitlistCourses: [] });
+        }}
+        onConfirm={handleJoinWaitlistAndEnroll}
         course={waitlistModal.course}
       />
 
@@ -650,6 +753,34 @@ export default function ClassSearchPage() {
                   )}
                   {enrolledScheduledCourses.length > 0 && addedScheduledCourses.length > 0 && (
                     <div className="schedule-course-divider"></div>
+                  )}
+
+                  {waitlistedScheduledCourses.length > 0 && (
+                    <>
+                      <div className="schedule-course-section-label">Waitlisted Courses</div>
+                      {waitlistedScheduledCourses.map((course) => {
+                        const isExpanded = expandedScheduledCourseId === course.id;
+
+                        return (
+                          <ClassCard
+                            key={course.id}
+                            course={course}
+                            variant="schedule"
+                            isExpanded={isExpanded}
+                            onToggle={() =>
+                              setExpandedScheduledCourseId(isExpanded ? null : course.id)
+                            }
+                            isCourseAdded={isCourseAdded}
+                            handleToggleCourse={handleToggleCourse}
+                            isCourseEnrolled={isCourseEnrolled}
+                            isCourseWaitlisted={isCourseWaitlisted}
+                            getCourseDisplayStatus={getCourseDisplayStatus}
+                            handleDropCourse={handleDropCourse}
+                            showCheckbox={false}
+                          />
+                        );
+                      })}
+                    </>
                   )}
 
                   {addedScheduledCourses.length > 0 && (

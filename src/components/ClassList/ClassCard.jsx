@@ -25,15 +25,18 @@ export default function ClassCard({
   onToggleSelect,
 }) {
   const addedOrEnrolledStatus = getCourseDisplayStatus(course.id);
+
   const displayStatus =
     variant === "schedule"
-      ? addedOrEnrolledStatus === "Enrolled"
-        ? "Enrolled"
+      ? addedOrEnrolledStatus === "Enrolled" || addedOrEnrolledStatus === "Waitlisted"
+        ? addedOrEnrolledStatus
         : course.status
       : addedOrEnrolledStatus || course.status;
 
   const isEnrolled = displayStatus === "Enrolled";
-  const statusClass = displayStatus.toLowerCase().replace(" ", "-");
+  const isWaitlisted = displayStatus === "Waitlisted";
+  const isCommittedCourse = isEnrolled || isWaitlisted;
+  const statusClass = displayStatus.toLowerCase().replace(/\s+/g, "-");
 
   return (
     <div className={`class-result-item class-result-item--${variant}`}>
@@ -53,6 +56,7 @@ export default function ClassCard({
           className={`class-result-row class-result-row--${variant} 
             ${isExpanded ? "expanded" : ""}
             ${isEnrolled ? "class-result-row--enrolled" : ""}
+            ${isWaitlisted ? "class-result-row--waitlisted" : ""}
         `}
           onClick={onToggle}>
           <div className="class-result-main">
@@ -73,6 +77,8 @@ export default function ClassCard({
             <span className="status-icon">
               {displayStatus === "Enrolled" ? (
                 <CheckCircle />
+              ) : displayStatus === "Waitlisted" ? (
+                <ErrorIcon />
               ) : displayStatus === "Added" ? (
                 <Check />
               ) : displayStatus === "Open" ? (
@@ -91,7 +97,9 @@ export default function ClassCard({
       {isExpanded && (
         <div
           className={`class-result-details class-result-details--${variant}
-            ${isEnrolled ? "class-result-details--enrolled" : ""}`}>
+            ${isCommittedCourse ? "class-result-details--enrolled" : ""}
+            ${isWaitlisted ? "class-result-details--waitlisted" : ""}
+          `}>
           <div className="class-result-details-grid">
             <div className="class-result-details-left">
               <ClassDetailItem label="Course Code" value={course.code} />
@@ -151,8 +159,8 @@ export default function ClassCard({
                   </button>
                 )}
 
-                {/* Schedule list button (only for enrolled classes) */}
-                {variant === "schedule" && isEnrolled && (
+                {/* Schedule list button (only for enrolled and waitlisted classes) */}
+                {variant === "schedule" && isCommittedCourse && (
                   <button
                     className="add-class-btn drop"
                     onClick={(e) => {
