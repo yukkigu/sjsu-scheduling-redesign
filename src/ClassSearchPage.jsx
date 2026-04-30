@@ -15,6 +15,9 @@ import Sidebar from "./components/Navbars/Sidebar";
 import CustomDropdown from "./components/Dropdown/CustomDropdown";
 import WaitlistModal from "./components/Modals/WaitlistModal";
 import PrereqModal from "./components/Modals/PrereqModal";
+
+import EnrollSuccessModal from "./components/Modals/EnrollSuccessModal";
+
 // import DaysCard from "./components/AdditionalCriteria/days-card";
 import AdditionalCriteria from "./components/AdditionalCriteria/AdditionalCriteria";
 
@@ -70,6 +73,16 @@ export default function ClassSearchPage() {
     isOpen: false,
     course: null,
   });
+
+  const [enrolledClasses, setEnrolledClasses] = useState( { 
+    1: [], 
+    2: [], 
+    3: [] 
+  });
+
+  const [selectedCourseIds, setSelectedCourseIds] = useState([]);
+  const [enrollSuccessModal, setEnrollSuccessModal] = useState({ isOpen: false, enrolledCourses: [] });
+
   // -----------------------------------------------------
 
   const termOptions = ["Spring 2026", "Fall 2026", "Summer 2026", "Spring 2027"];
@@ -165,6 +178,8 @@ export default function ClassSearchPage() {
   const scheduledEvents = scheduledClasses[activeSchedule].flatMap((course) => {
     const meetingDays = parseMeetingDays(course.times);
     const { startMinutes, endMinutes } = parseTimeRange(course.times);
+    const isEnrolled = enrolledClasses[activeSchedule].some((c) => c.id === course.id);
+
 
     return meetingDays.map((day) => ({
       id: `${course.id}-${day}`,
@@ -173,12 +188,28 @@ export default function ClassSearchPage() {
       column: DAY_TO_COLUMN[day],
       startMinutes,
       endMinutes,
+      isEnrolled,
     }));
+  });
+
+  const eventsConflict = (a,b) => {
+    if (a.day !== b.day) return false;
+    return a.startMinutes <b.endMinutes && b.startMinutes <a.endMinutes;
+  };
+
+  const eventsWithConflicts = scheduledEvents.map((event, index) => {
+    const hasConflict = scheduledEvents.some(
+      (other, otherIndex) => otherIndex <index && eventsConflict(event, other)
+    );
+    return { ...event, hasConflict };
   });
 
   const isCourseAdded = (courseId) => {
     return scheduledClasses[activeSchedule].some((c) => c.id === courseId);
   };
+
+  const isCourseEnrolled = (courseId) => 
+    enrolledClasses[activeSchedule].some((c) => c.id === courseId);
 
   const handleToggleCourse = (course) => {
     const alreadyAdded = isCourseAdded(course.id);
@@ -212,6 +243,49 @@ export default function ClassSearchPage() {
     }));
   };
 
+  const handleToggleSelect = (courseId) => {
+    setSelectedCourseIds((prev) =>
+      prev.includes(courseId) ? prev.filter((id) => id != courseId) : [...prev, courseId]
+    );
+  };
+
+  const handleDropSelected = () => {
+    setScheduledClasses((prev) => ({
+      ...prev,
+      [activeSchedule]: prev[activeSchedule].filter((c) => !selectedCourseIds.includes(c.id)),
+    }));
+    setEnrolledClasses((prev) => ({
+      ...prev,
+      [activeSchedule]: prev[activeSchedule].filter((c) => !selectedCourseIds.includes(c.id)),
+    }));
+    setSelectedCourseIds([]);
+  };
+
+  const handleDropAll = () => {
+    setScheduledClasses((prev) => ({ ...prev, [activeSchedule]: [] }));
+    setEnrolledClasses((prev) => ({ ...prev, [activeSchedule]: [] }));
+    setSelectedCourseIds([]);
+  };
+
+  const handleCheckoutSelected = () => {
+    const toEnroll = scheduledClasses[activeSchedule].filter((c) => selectedCourseIds.includes(c.id));
+    if (toEnroll.length === 0) return;
+    setEnrolledClasses((prev) => ({
+      ...prev,
+      [activeSchedule]: [...prev[activeSchedule].filter((c) => !toEnroll.some((e) => e.id === c.id)), ...toEnroll],
+    }));
+    setSelectedCourseIds([]);
+    setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll }); 
+  };
+
+  const handleCheckoutAll = () => {
+    const toEnroll = scheduledClasses[activeSchedule];
+    if (toEnroll.length === 0) return;
+    setEnrolledClasses((prev) => ({ ...prev, [activeSchedule]: toEnroll }));
+    setSelectedCourseIds([]);
+    setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll });
+  };
+
   const handleSearch = () => {
     const filtered = mockClasses.filter((course) => {
       const matchesTerm = !term || course.term === term;
@@ -224,6 +298,12 @@ export default function ClassSearchPage() {
     setSearchResults(filtered);
     setHasSearched(true);
   };
+
+  const getCourseDisplayStatus = (courseId) => {
+    if (isCourseEnrolled(courseId)) return "Enrolled";
+    if (isCourseAdded(courseId)) return "Added";
+    return null;
+  }
 
   return (
     <div className="class-search-page">
@@ -238,6 +318,12 @@ export default function ClassSearchPage() {
         onClose={() => setPrereqModal({ isOpen: false, course: null })}
         course={prereqModal.course}
       />
+
+      <EnrollSuccessModal
+        isOpen={enrollSuccessModal.isOpen}
+        onClose={() => setEnrollSuccessModal({ isOpen: false, enrolledCourses: [] })}
+        enrolledCourses={enrollSuccessModal.enrolledCourses}
+      />  
 
       <Topbar />
 
@@ -516,6 +602,29 @@ export default function ClassSearchPage() {
             </div>
 
             <div className="class-search-schedule-shell">
+               {scheduledClasses[activeSchedule].length > 0 && (
+                <div className="schedule-course-list">
+                  {scheduledClasses[activeSchedule].map((course) => {
+                    const isEnrolled = isCourseEnrolled(course.id);
+                    const isSelected = selectedCourseIds.includes(course.id);
+                    return(
+                      <div key={course.id} className={`schedule-list-row ${isEnrolled ? "schedule-list-row--enrolled" : ""}`}>
+                        <label className="checkbox" onClick={(e) => e.stopPropagation()}>
+                            <input type="checkbox" checked={isSelected} onChange={() => handleToggleSelect(course.id)} />
+                            <span className="checkmark"></span>
+                        </label>
+                        <span className="schedule-list-code">{course.code}</span>
+                        <span className="schedule-list-title">{course.title}</span>
+                        <span className="schedule-list-count">{course.enrolled}/{course.total}/{course.waitlist}</span>
+                        <span className={`schedule-list-status ${isEnrolled ? "status-enrolled" : "status-open"}`}>
+                          {isEnrolled ? "Enrolled" : "Open"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>  
+              )}
+
               <div className="calendar-shell">
                 <div className="calendar-grid">
                   <div className="calendar-header-row">
@@ -542,7 +651,7 @@ export default function ClassSearchPage() {
                   })}
 
                   <div className="calendar-events-layer">
-                    {scheduledEvents.map((event) => {
+                    {eventsWithConflicts.map((event) => {
                       const top = ((event.startMinutes - calendarStartHour * 60) / 60) * hourHeight;
 
                       const height = ((event.endMinutes - event.startMinutes) / 60) * hourHeight;
@@ -553,7 +662,7 @@ export default function ClassSearchPage() {
                       return (
                         <div
                           key={event.id}
-                          className="calendar-event-card"
+                          className={`calendar-event-card ${event.hasConflict ? "calendar-event-card--conflict" : event.isEnrolled ? "calendar-event-card--enrolled" : ""}`}
                           style={{
                             top: `${top + 38}px`, // offset for header row
                             left,
@@ -563,6 +672,7 @@ export default function ClassSearchPage() {
                           <div className="calendar-event-code">{event.course.code}</div>
                           <div className="calendar-event-instructor">{event.course.instructor}</div>
                           <div className="calendar-event-room">{event.course.location}</div>
+                          {event.isEnrolled && <div className="calendar-event-enrolled-badge">Enrolled</div>}
                         </div>
                       );
                     })}
@@ -572,13 +682,13 @@ export default function ClassSearchPage() {
 
               <div className="class-search-actions">
                 <div className="actions-left">
-                  <button className="action-btn">Drop Selected</button>
-                  <button className="action-btn">Drop All</button>
+                  <button className="action-btn" onClick={handleDropSelected}>Drop Selected</button>
+                  <button className="action-btn" onClick={handleDropAll}>Drop All</button>
                 </div>
 
                 <div className="actions-right">
-                  <button className="action-btn">Checkout Selected</button>
-                  <button className="action-btn">Checkout All</button>
+                  <button className="action-btn" onClick={handleCheckoutSelected}>Checkout Selected</button>
+                  <button className="action-btn" onClick={handleCheckoutAll}>Checkout All</button>
                 </div>
               </div>
             </div>
