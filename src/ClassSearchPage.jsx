@@ -18,8 +18,8 @@ import PrereqModal from "./components/Modals/PrereqModal";
 
 import EnrollSuccessModal from "./components/Modals/EnrollSuccessModal";
 
-// import DaysCard from "./components/AdditionalCriteria/days-card";
 import AdditionalCriteria from "./components/AdditionalCriteria/AdditionalCriteria";
+import ClassCard from "./components/ClassList/ClassCard";
 
 export default function ClassSearchPage() {
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ export default function ClassSearchPage() {
   // --------------------------------------------------------------
 
   const [expandedCourseId, setExpandedCourseId] = useState(null);
+  const [expandedScheduledCourseId, setExpandedScheduledCourseId] = useState(null);
 
   const [activeSchedule, setActiveSchedule] = useState(1);
   const [scheduledClasses, setScheduledClasses] = useState({
@@ -74,14 +75,17 @@ export default function ClassSearchPage() {
     course: null,
   });
 
-  const [enrolledClasses, setEnrolledClasses] = useState( { 
-    1: [], 
-    2: [], 
-    3: [] 
+  const [enrolledClasses, setEnrolledClasses] = useState({
+    1: [],
+    2: [],
+    3: [],
   });
 
   const [selectedCourseIds, setSelectedCourseIds] = useState([]);
-  const [enrollSuccessModal, setEnrollSuccessModal] = useState({ isOpen: false, enrolledCourses: [] });
+  const [enrollSuccessModal, setEnrollSuccessModal] = useState({
+    isOpen: false,
+    enrolledCourses: [],
+  });
 
   // -----------------------------------------------------
 
@@ -180,7 +184,6 @@ export default function ClassSearchPage() {
     const { startMinutes, endMinutes } = parseTimeRange(course.times);
     const isEnrolled = enrolledClasses[activeSchedule].some((c) => c.id === course.id);
 
-
     return meetingDays.map((day) => ({
       id: `${course.id}-${day}`,
       course,
@@ -192,14 +195,14 @@ export default function ClassSearchPage() {
     }));
   });
 
-  const eventsConflict = (a,b) => {
+  const eventsConflict = (a, b) => {
     if (a.day !== b.day) return false;
-    return a.startMinutes <b.endMinutes && b.startMinutes <a.endMinutes;
+    return a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes;
   };
 
   const eventsWithConflicts = scheduledEvents.map((event, index) => {
     const hasConflict = scheduledEvents.some(
-      (other, otherIndex) => otherIndex <index && eventsConflict(event, other)
+      (other, otherIndex) => otherIndex < index && eventsConflict(event, other),
     );
     return { ...event, hasConflict };
   });
@@ -208,7 +211,7 @@ export default function ClassSearchPage() {
     return scheduledClasses[activeSchedule].some((c) => c.id === courseId);
   };
 
-  const isCourseEnrolled = (courseId) => 
+  const isCourseEnrolled = (courseId) =>
     enrolledClasses[activeSchedule].some((c) => c.id === courseId);
 
   const handleToggleCourse = (course) => {
@@ -245,7 +248,7 @@ export default function ClassSearchPage() {
 
   const handleToggleSelect = (courseId) => {
     setSelectedCourseIds((prev) =>
-      prev.includes(courseId) ? prev.filter((id) => id != courseId) : [...prev, courseId]
+      prev.includes(courseId) ? prev.filter((id) => id != courseId) : [...prev, courseId],
     );
   };
 
@@ -268,14 +271,19 @@ export default function ClassSearchPage() {
   };
 
   const handleCheckoutSelected = () => {
-    const toEnroll = scheduledClasses[activeSchedule].filter((c) => selectedCourseIds.includes(c.id));
+    const toEnroll = scheduledClasses[activeSchedule].filter((c) =>
+      selectedCourseIds.includes(c.id),
+    );
     if (toEnroll.length === 0) return;
     setEnrolledClasses((prev) => ({
       ...prev,
-      [activeSchedule]: [...prev[activeSchedule].filter((c) => !toEnroll.some((e) => e.id === c.id)), ...toEnroll],
+      [activeSchedule]: [
+        ...prev[activeSchedule].filter((c) => !toEnroll.some((e) => e.id === c.id)),
+        ...toEnroll,
+      ],
     }));
     setSelectedCourseIds([]);
-    setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll }); 
+    setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll });
   };
 
   const handleCheckoutAll = () => {
@@ -303,7 +311,7 @@ export default function ClassSearchPage() {
     if (isCourseEnrolled(courseId)) return "Enrolled";
     if (isCourseAdded(courseId)) return "Added";
     return null;
-  }
+  };
 
   return (
     <div className="class-search-page">
@@ -323,7 +331,7 @@ export default function ClassSearchPage() {
         isOpen={enrollSuccessModal.isOpen}
         onClose={() => setEnrollSuccessModal({ isOpen: false, enrolledCourses: [] })}
         enrolledCourses={enrollSuccessModal.enrolledCourses}
-      />  
+      />
 
       <Topbar />
 
@@ -429,155 +437,17 @@ export default function ClassSearchPage() {
                     {searchResults.length > 0 ? (
                       searchResults.map((course) => {
                         const isExpanded = expandedCourseId === course.id;
-
                         return (
-                          <div key={course.id} className="class-result-item">
-                            <button
-                              className={`class-result-row ${isExpanded ? "expanded" : ""}`}
-                              onClick={() => setExpandedCourseId(isExpanded ? null : course.id)}>
-                              <div className="class-result-main">
-                                <span className="class-result-caret">
-                                  {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                </span>
-                                <span className="class-result-title">
-                                  {course.code} - {course.title}
-                                </span>
-                              </div>
-
-                              <div className="class-result-count">
-                                {course.enrolled}/{course.total}/{course.waitlist}
-                              </div>
-
-                              <div
-                                className={`class-result-status ${
-                                  isCourseAdded(course.id)
-                                    ? "added"
-                                    : course.status.toLowerCase().replace(" ", "-")
-                                }`}>
-                                <span className="status-icon">
-                                  {isCourseAdded(course.id) ? (
-                                    <CircleIcon />
-                                  ) : course.status === "Open" ? (
-                                    <CircleIcon />
-                                  ) : course.status === "Closed" ? (
-                                    <CancelIcon />
-                                  ) : (
-                                    <ErrorIcon />
-                                  )}
-                                </span>
-                                {isCourseAdded(course.id) ? "Added" : course.status}
-                              </div>
-                            </button>
-
-                            {isExpanded && (
-                              <div className="class-result-details">
-                                <div className="class-result-details-grid">
-                                  <div className="class-result-details-left">
-                                    <div className="detail-row">
-                                      <span className="detail-label">Class Number</span>
-                                      <span>{course.classNumber}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Session</span>
-                                      <span>{course.session}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Units</span>
-                                      <span>{course.units}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Instruction Mode</span>
-                                      <span>{course.instructionMode}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Career</span>
-                                      <span>{course.career}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Grading</span>
-                                      <span>{course.grading}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Dates</span>
-                                      <span>{course.dates}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Times</span>
-                                      <span>{course.times}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Location</span>
-                                      <span>{course.location}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                      <span className="detail-label">Instructor</span>
-                                      <span>{course.instructor}</span>
-                                    </div>
-                                  </div>
-
-                                  <div className="class-result-details-right">
-                                    <div className="detail-block">
-                                      <div className="detail-block-title">Description:</div>
-                                      <p>{course.description}</p>
-                                    </div>
-
-                                    <div className="detail-block-row">
-                                      <div className="detail-block">
-                                        <div className="detail-block-title">Prerequisite(s):</div>
-                                        <ul>
-                                          {course.prerequisites.map((item) => (
-                                            <li key={item}>{item}</li>
-                                          ))}
-                                        </ul>
-                                      </div>
-
-                                      <div className="detail-block availability-block">
-                                        <div className="detail-block-title">
-                                          Class Availability:
-                                        </div>
-                                        <ul>
-                                          <li>
-                                            Class capacity: {course.classAvailability.classCapacity}
-                                          </li>
-                                          <li>
-                                            Total enrolled: {course.classAvailability.totalEnrolled}
-                                          </li>
-                                          <li>
-                                            Available seats:{" "}
-                                            {course.classAvailability.availableSeats}
-                                          </li>
-                                          <li>
-                                            Waitlist capacity:{" "}
-                                            {course.classAvailability.waitlistCapacity}
-                                          </li>
-                                        </ul>
-                                      </div>
-                                    </div>
-                                    <div className="detail-block">
-                                      <div className="detail-block-title">
-                                        Allowed Declared Major:
-                                      </div>
-                                      <p>{course.allowedMajors.join(", ")}.</p>
-                                      <p>Or Instructor consent.</p>
-                                    </div>
-
-                                    <div className="class-result-actions">
-                                      {course.status !== "Closed" && (
-                                        <button
-                                          className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleToggleCourse(course);
-                                          }}>
-                                          {isCourseAdded(course.id) ? "Remove Class" : "Add Class"}
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          <ClassCard
+                            key={course.id}
+                            course={course}
+                            isExpanded={isExpanded}
+                            onToggle={() => setExpandedCourseId(isExpanded ? null : course.id)}
+                            isCourseAdded={isCourseAdded}
+                            handleToggleCourse={handleToggleCourse}
+                            isCourseEnrolled={isCourseEnrolled}
+                            getCourseDisplayStatus={getCourseDisplayStatus}
+                          />
                         );
                       })
                     ) : (
@@ -602,27 +472,52 @@ export default function ClassSearchPage() {
             </div>
 
             <div className="class-search-schedule-shell">
-               {scheduledClasses[activeSchedule].length > 0 && (
+              {scheduledClasses[activeSchedule].length > 0 && (
                 <div className="schedule-course-list">
                   {scheduledClasses[activeSchedule].map((course) => {
                     const isEnrolled = isCourseEnrolled(course.id);
                     const isSelected = selectedCourseIds.includes(course.id);
-                    return(
-                      <div key={course.id} className={`schedule-list-row ${isEnrolled ? "schedule-list-row--enrolled" : ""}`}>
-                        <label className="checkbox" onClick={(e) => e.stopPropagation()}>
-                            <input type="checkbox" checked={isSelected} onChange={() => handleToggleSelect(course.id)} />
-                            <span className="checkmark"></span>
-                        </label>
-                        <span className="schedule-list-code">{course.code}</span>
-                        <span className="schedule-list-title">{course.title}</span>
-                        <span className="schedule-list-count">{course.enrolled}/{course.total}/{course.waitlist}</span>
-                        <span className={`schedule-list-status ${isEnrolled ? "status-enrolled" : "status-open"}`}>
-                          {isEnrolled ? "Enrolled" : "Open"}
-                        </span>
-                      </div>
+                    const isExpanded = expandedScheduledCourseId === course.id;
+                    return (
+                      // <div
+                      //   key={course.id}
+                      //   className={`schedule-list-row ${isEnrolled ? "schedule-list-row--enrolled" : ""}`}>
+                      //   <label className="checkbox" onClick={(e) => e.stopPropagation()}>
+                      //     <input
+                      //       type="checkbox"
+                      //       checked={isSelected}
+                      //       onChange={() => handleToggleSelect(course.id)}
+                      //     />
+                      //     <span className="checkmark"></span>
+                      //   </label>
+                      //   <span className="schedule-list-code">{course.code}</span>
+                      //   <span className="schedule-list-title">{course.title}</span>
+                      //   <span className="schedule-list-count">
+                      //     {course.enrolled}/{course.total}/{course.waitlist}
+                      //   </span>
+                      //   <span
+                      //     className={`schedule-list-status ${isEnrolled ? "status-enrolled" : "status-open"}`}>
+                      //     {isEnrolled ? "Enrolled" : "Open"}
+                      //   </span>
+                      // </div>
+
+                      <ClassCard
+                        key={course.id}
+                        course={course}
+                        variant="schedule"
+                        isExpanded={isExpanded}
+                        onToggle={() => setExpandedScheduledCourseId(isExpanded ? null : course.id)}
+                        isCourseAdded={isCourseAdded}
+                        handleToggleCourse={handleToggleCourse}
+                        isCourseEnrolled={isCourseEnrolled}
+                        getCourseDisplayStatus={getCourseDisplayStatus}
+                        showCheckbox={true}
+                        isSelected={isSelected}
+                        onToggleSelect={handleToggleSelect}
+                      />
                     );
                   })}
-                </div>  
+                </div>
               )}
 
               <div className="calendar-shell">
@@ -672,7 +567,9 @@ export default function ClassSearchPage() {
                           <div className="calendar-event-code">{event.course.code}</div>
                           <div className="calendar-event-instructor">{event.course.instructor}</div>
                           <div className="calendar-event-room">{event.course.location}</div>
-                          {event.isEnrolled && <div className="calendar-event-enrolled-badge">Enrolled</div>}
+                          {event.isEnrolled && (
+                            <div className="calendar-event-enrolled-badge">Enrolled</div>
+                          )}
                         </div>
                       );
                     })}
@@ -682,13 +579,21 @@ export default function ClassSearchPage() {
 
               <div className="class-search-actions">
                 <div className="actions-left">
-                  <button className="action-btn" onClick={handleDropSelected}>Drop Selected</button>
-                  <button className="action-btn" onClick={handleDropAll}>Drop All</button>
+                  <button className="action-btn" onClick={handleDropSelected}>
+                    Drop Selected
+                  </button>
+                  <button className="action-btn" onClick={handleDropAll}>
+                    Drop All
+                  </button>
                 </div>
 
                 <div className="actions-right">
-                  <button className="action-btn" onClick={handleCheckoutSelected}>Checkout Selected</button>
-                  <button className="action-btn" onClick={handleCheckoutAll}>Checkout All</button>
+                  <button className="action-btn" onClick={handleCheckoutSelected}>
+                    Checkout Selected
+                  </button>
+                  <button className="action-btn" onClick={handleCheckoutAll}>
+                    Checkout All
+                  </button>
                 </div>
               </div>
             </div>

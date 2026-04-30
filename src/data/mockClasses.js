@@ -18,7 +18,7 @@ export const mockClasses = [
         instructionMode: "In Person",
         grading: "Letter Grading",
         dates: "01/22/2026 - 05/11/2026",
-        times: "MoWe 10:30AM - 11:45AM",
+        times: "TuTh 10:00AM - 11:15AM",
         location: "Sweeney Hall 205",
         instructor: "Jane Doe",
         description: "Graduate technical writing workshop to develop advanced communication skills that will meet the professional needs of computer scientists, along with research methodologies and proper documentation for the master's thesis project. Satisfies GWAR.",

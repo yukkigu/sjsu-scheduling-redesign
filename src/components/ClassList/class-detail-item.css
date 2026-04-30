@@ -1,0 +1,12 @@
+.detail-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 18px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #28344a;
+}
