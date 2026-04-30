@@ -69,7 +69,7 @@ export default function WaitlistModal({ isOpen, onClose, course }) {
           {course
             ? `${course.code} - ${course.title} is currently full.`
             : "This class is currently full."}{" "}
-          Do you want to add yourself to the waitlist?
+          Do you want to join the waitlist?
         </p>
 
         <div className="modal-actions modal-actions--split">

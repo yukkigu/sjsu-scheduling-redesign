@@ -15,8 +15,8 @@ import Sidebar from "./components/Navbars/Sidebar";
 import CustomDropdown from "./components/Dropdown/CustomDropdown";
 import WaitlistModal from "./components/Modals/WaitlistModal";
 import PrereqModal from "./components/Modals/PrereqModal";
-
 import EnrollSuccessModal from "./components/Modals/EnrollSuccessModal";
+import ClassConflictModal from "./components/Modals/ClassConflictModal";
 
 import AdditionalCriteria from "./components/AdditionalCriteria/AdditionalCriteria";
 import ClassCard from "./components/ClassList/ClassCard";
@@ -85,6 +85,11 @@ export default function ClassSearchPage() {
   const [enrollSuccessModal, setEnrollSuccessModal] = useState({
     isOpen: false,
     enrolledCourses: [],
+  });
+
+  const [classConflictModal, setClassConflictModal] = useState({
+    isOpen: false,
+    conflictingCourses: [],
   });
 
   // -----------------------------------------------------
@@ -200,6 +205,28 @@ export default function ClassSearchPage() {
     return a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes;
   };
 
+  const hasScheduleConflict = (courses) => {
+    const events = courses.flatMap((course) => {
+      const meetingDays = parseMeetingDays(course.times);
+      const { startMinutes, endMinutes } = parseTimeRange(course.times);
+
+      return meetingDays.map((day) => ({
+        day,
+        startMinutes,
+        endMinutes,
+      }));
+    });
+
+    for (let i = 0; i < events.length; i++) {
+      for (let j = i + 1; j < events.length; j++) {
+        if (eventsConflict(events[i], events[j])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   const eventsWithConflicts = scheduledEvents.map((event, index) => {
     const hasConflict = scheduledEvents.some(
       (other, otherIndex) => otherIndex < index && eventsConflict(event, other),
@@ -252,6 +279,33 @@ export default function ClassSearchPage() {
     );
   };
 
+  const getConflictingCourses = (courses) => {
+    const events = courses.flatMap((course) => {
+      const meetingDays = parseMeetingDays(course.times);
+      const { startMinutes, endMinutes } = parseTimeRange(course.times);
+
+      return meetingDays.map((day) => ({
+        course,
+        day,
+        startMinutes,
+        endMinutes,
+      }));
+    });
+
+    const conflicts = new Map();
+
+    for (let i = 0; i < events.length; i++) {
+      for (let j = i + 1; j < events.length; j++) {
+        if (eventsConflict(events[i], events[j])) {
+          conflicts.set(events[i].course.id, events[i].course);
+          conflicts.set(events[j].course.id, events[j].course);
+        }
+      }
+    }
+
+    return Array.from(conflicts.values());
+  };
+
   const handleDropSelected = () => {
     setScheduledClasses((prev) => ({
       ...prev,
@@ -275,6 +329,14 @@ export default function ClassSearchPage() {
       selectedCourseIds.includes(c.id),
     );
     if (toEnroll.length === 0) return;
+    const conflictingCourses = getConflictingCourses(toEnroll);
+    if (conflictingCourses.length > 0) {
+      setClassConflictModal({
+        isOpen: true,
+        conflictingCourses,
+      });
+      return;
+    }
     setEnrolledClasses((prev) => ({
       ...prev,
       [activeSchedule]: [
@@ -289,6 +351,14 @@ export default function ClassSearchPage() {
   const handleCheckoutAll = () => {
     const toEnroll = scheduledClasses[activeSchedule];
     if (toEnroll.length === 0) return;
+    const conflictingCourses = getConflictingCourses(toEnroll);
+    if (conflictingCourses.length > 0) {
+      setClassConflictModal({
+        isOpen: true,
+        conflictingCourses,
+      });
+      return;
+    }
     setEnrolledClasses((prev) => ({ ...prev, [activeSchedule]: toEnroll }));
     setSelectedCourseIds([]);
     setEnrollSuccessModal({ isOpen: true, enrolledCourses: toEnroll });
@@ -315,6 +385,7 @@ export default function ClassSearchPage() {
 
   return (
     <div className="class-search-page">
+      {/* Modals */}
       <WaitlistModal
         isOpen={waitlistModal.isOpen}
         onClose={() => setWaitlistModal({ isOpen: false, course: null })}
@@ -331,6 +402,12 @@ export default function ClassSearchPage() {
         isOpen={enrollSuccessModal.isOpen}
         onClose={() => setEnrollSuccessModal({ isOpen: false, enrolledCourses: [] })}
         enrolledCourses={enrollSuccessModal.enrolledCourses}
+      />
+
+      <ClassConflictModal
+        isOpen={classConflictModal.isOpen}
+        onClose={() => setClassConflictModal({ isOpen: false, conflictingCourses: [] })}
+        conflictingCourses={classConflictModal.conflictingCourses}
       />
 
       <Topbar />
@@ -538,7 +615,7 @@ export default function ClassSearchPage() {
                             key={event.id}
                             className={`calendar-event-card ${event.hasConflict ? "calendar-event-card--conflict" : event.isEnrolled ? "calendar-event-card--enrolled" : ""}`}
                             style={{
-                              top: `${top}px`, // offset for header row
+                              top: `${top}px`,
                               left,
                               width,
                               height: `${height}px`,
