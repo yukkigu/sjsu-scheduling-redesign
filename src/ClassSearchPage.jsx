@@ -479,28 +479,6 @@ export default function ClassSearchPage() {
                     const isSelected = selectedCourseIds.includes(course.id);
                     const isExpanded = expandedScheduledCourseId === course.id;
                     return (
-                      // <div
-                      //   key={course.id}
-                      //   className={`schedule-list-row ${isEnrolled ? "schedule-list-row--enrolled" : ""}`}>
-                      //   <label className="checkbox" onClick={(e) => e.stopPropagation()}>
-                      //     <input
-                      //       type="checkbox"
-                      //       checked={isSelected}
-                      //       onChange={() => handleToggleSelect(course.id)}
-                      //     />
-                      //     <span className="checkmark"></span>
-                      //   </label>
-                      //   <span className="schedule-list-code">{course.code}</span>
-                      //   <span className="schedule-list-title">{course.title}</span>
-                      //   <span className="schedule-list-count">
-                      //     {course.enrolled}/{course.total}/{course.waitlist}
-                      //   </span>
-                      //   <span
-                      //     className={`schedule-list-status ${isEnrolled ? "status-enrolled" : "status-open"}`}>
-                      //     {isEnrolled ? "Enrolled" : "Open"}
-                      //   </span>
-                      // </div>
-
                       <ClassCard
                         key={course.id}
                         course={course}
@@ -521,58 +499,62 @@ export default function ClassSearchPage() {
               )}
 
               <div className="calendar-shell">
-                <div className="calendar-grid">
-                  <div className="calendar-header-row">
-                    <div className="calendar-time-header"></div>
-                    {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
-                      <div key={day} className="calendar-day-header">
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-
-                  {Array.from({ length: calendarEndHour - calendarStartHour + 1 }, (_, i) => {
-                    const hour = calendarStartHour + i;
-                    return (
-                      <div key={hour} className="calendar-hour-row">
-                        <div className="calendar-time-label">
-                          {String(hour).padStart(2, "0")}:00
-                        </div>
-                        {Array.from({ length: dayColumnCount }, (_, col) => (
-                          <div key={col} className="calendar-cell"></div>
-                        ))}
-                      </div>
-                    );
-                  })}
-
-                  <div className="calendar-events-layer">
-                    {eventsWithConflicts.map((event) => {
-                      const top = ((event.startMinutes - calendarStartHour * 60) / 60) * hourHeight;
-
-                      const height = ((event.endMinutes - event.startMinutes) / 60) * hourHeight;
-
-                      const left = `calc(${timeColumnWidth}px + (${event.column} * ((100% - ${timeColumnWidth}px) / ${dayColumnCount})))`;
-                      const width = `calc((100% - ${timeColumnWidth}px) / ${dayColumnCount})`;
-
+                <div className="calendar-header-row">
+                  <div className="calendar-time-header"></div>
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
+                    <div key={day} className="calendar-day-header">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                <div className="calendar-scroll">
+                  <div className="calendar-grid">
+                    {Array.from({ length: calendarEndHour - calendarStartHour + 1 }, (_, i) => {
+                      const hour = calendarStartHour + i;
                       return (
-                        <div
-                          key={event.id}
-                          className={`calendar-event-card ${event.hasConflict ? "calendar-event-card--conflict" : event.isEnrolled ? "calendar-event-card--enrolled" : ""}`}
-                          style={{
-                            top: `${top + 38}px`, // offset for header row
-                            left,
-                            width,
-                            height: `${height}px`,
-                          }}>
-                          <div className="calendar-event-code">{event.course.code}</div>
-                          <div className="calendar-event-instructor">{event.course.instructor}</div>
-                          <div className="calendar-event-room">{event.course.location}</div>
-                          {event.isEnrolled && (
-                            <div className="calendar-event-enrolled-badge">Enrolled</div>
-                          )}
+                        <div key={hour} className="calendar-hour-row">
+                          <div className="calendar-time-label">
+                            {String(hour).padStart(2, "0")}:00
+                          </div>
+                          {Array.from({ length: dayColumnCount }, (_, col) => (
+                            <div key={col} className="calendar-cell"></div>
+                          ))}
                         </div>
                       );
                     })}
+
+                    <div className="calendar-events-layer">
+                      {eventsWithConflicts.map((event) => {
+                        const top =
+                          ((event.startMinutes - calendarStartHour * 60) / 60) * hourHeight;
+
+                        const height = ((event.endMinutes - event.startMinutes) / 60) * hourHeight;
+
+                        const left = `calc(${timeColumnWidth}px + (${event.column} * ((100% - ${timeColumnWidth}px) / ${dayColumnCount})))`;
+                        const width = `calc((100% - ${timeColumnWidth}px) / ${dayColumnCount})`;
+
+                        return (
+                          <div
+                            key={event.id}
+                            className={`calendar-event-card ${event.hasConflict ? "calendar-event-card--conflict" : event.isEnrolled ? "calendar-event-card--enrolled" : ""}`}
+                            style={{
+                              top: `${top}px`, // offset for header row
+                              left,
+                              width,
+                              height: `${height}px`,
+                            }}>
+                            <div className="calendar-event-code">{event.course.code}</div>
+                            <div className="calendar-event-instructor">
+                              {event.course.instructor}
+                            </div>
+                            <div className="calendar-event-room">{event.course.location}</div>
+                            {event.isEnrolled && (
+                              <div className="calendar-event-enrolled-badge">Enrolled</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>

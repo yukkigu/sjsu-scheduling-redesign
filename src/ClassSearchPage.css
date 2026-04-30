@@ -372,13 +372,36 @@
   border-radius: 8px;
   overflow: hidden;
 }
+.calendar-header-row {
+  display: grid;
+  grid-template-columns: 90px repeat(5, 1fr);
+  height: 38px;
+  border-bottom: 1px solid #d7ddeb;
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-right: 13px;
+}
+
+.calendar-scroll {
+  max-height: 800px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  overflow-y: auto;
+}
+
+.calendar-events-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 
 .calendar-grid {
   position: relative;
   width: 100%;
 }
 
-.calendar-header-row,
 .calendar-hour-row {
   display: grid;
   grid-template-columns: 90px repeat(5, 1fr);
@@ -419,6 +442,9 @@
   border-right: 1px solid #d7ddeb;
   border-bottom: 1px solid #d7ddeb;
   background: #ffffff;
+  position: sticky;
+  left: 0;
+  z-index: 4;
 }
 
 .calendar-cell {
@@ -434,13 +460,6 @@
 .calendar-hour-row:nth-child(even) .calendar-time-label {
   background: #f8f8f8;
 }
-
-.calendar-events-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
 .calendar-event-card {
   position: absolute;
   background: #dce4f2;
@@ -490,14 +509,14 @@
 }
 
 .calendar-event-enrolled-badge {
-  font-size: 9px;
-  font-weight: 700;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
   background: rgba(255, 255, 255, 0.25);
-  border-radius: 4px;
-  padding: 1px 4px;
-  color: #ffffff;
-  margin-top: 4px;
-  display: inline-block;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
 }
