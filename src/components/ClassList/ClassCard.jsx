@@ -23,6 +23,7 @@ export default function ClassCard({
   showCheckbox = false,
   isSelected = false,
   onToggleSelect,
+  showDropButton = true,
 }) {
   const addedOrEnrolledStatus = getCourseDisplayStatus(course.id);
 
@@ -163,7 +164,7 @@ export default function ClassCard({
                   )}
 
                 {/* Schedule list button (only for enrolled and waitlisted classes) */}
-                {variant === "schedule" && isCommittedCourse && (
+                {variant === "schedule" && isCommittedCourse && showDropButton && (
                   <button
                     className="add-class-btn drop"
                     onClick={(e) => {

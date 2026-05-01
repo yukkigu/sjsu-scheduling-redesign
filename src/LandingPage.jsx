@@ -33,9 +33,8 @@ export default function LandingPage() {
   ];
 
   const quickLinks = [
-    "Class Search",
-    "MySchedule",
-    "Add/Drop Class",
+    "Add/Drop Classes",
+    "My Schedule",
     "My Academics",
     "Order Official Transcript",
   ];
@@ -94,8 +93,11 @@ export default function LandingPage() {
                       key={link}
                       className="landing-link-item"
                       onClick={() => {
-                        if (link === "Class Search") {
+                        if (link === "Add/Drop Classes") {
                           navigate("/class-search");
+                        }
+                        if (link === "My Schedule") {
+                          navigate("/my-schedule");
                         }
                       }}>
                       <span>{link}</span>

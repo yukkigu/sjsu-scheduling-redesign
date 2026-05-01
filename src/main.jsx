@@ -4,10 +4,14 @@ import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 
+import { ScheduleProvider } from "./context/ScheduleContext";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ScheduleProvider>
+        <App />
+      </ScheduleProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

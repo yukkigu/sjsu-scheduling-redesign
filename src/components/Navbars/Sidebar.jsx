@@ -26,7 +26,7 @@ export default function Sidebar({
     "Logout",
   ];
 
-  const enrollmentSubtabs = ["Enrollment Date", "Class Search", "MySchedule"];
+  const enrollmentSubtabs = ["Enrollment Date", "Add/Drop Classes", "My Schedule"];
 
   const handleNavClick = (item) => {
     if (item === "Student Center") {
@@ -40,8 +40,11 @@ export default function Sidebar({
   };
 
   const handleSubtabClick = (subtab) => {
-    if (subtab === "Class Search") {
+    if (subtab === "Add/Drop Classes") {
       navigate("/class-search");
+    }
+    if (subtab === "My Schedule") {
+      navigate("/my-schedule");
     }
   };
 

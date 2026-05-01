@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import "./ClassSearchPage.css";
 import { mockClasses } from "./data/mockClasses";
+import { useSchedule } from "./context/ScheduleContext.jsx";
 
 import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -22,6 +23,7 @@ import DropConfirmModal from "./components/Modals/DropConfirmModal";
 
 import AdditionalCriteria from "./components/AdditionalCriteria/AdditionalCriteria";
 import ClassCard from "./components/ClassList/ClassCard";
+import ScheduleCalendar from "./components/Schedule/ScheduleCalendar";
 
 export default function ClassSearchPage() {
   const navigate = useNavigate();
@@ -68,17 +70,21 @@ export default function ClassSearchPage() {
   const [expandedCourseId, setExpandedCourseId] = useState(null);
   const [expandedScheduledCourseId, setExpandedScheduledCourseId] = useState(null);
 
-  const [activeSchedule, setActiveSchedule] = useState(1);
-  const [scheduledClasses, setScheduledClasses] = useState({
-    1: [],
-    2: [],
-    3: [],
-  });
-
   const [pendingWaitlistEnrollment, setPendingWaitlistEnrollment] = useState({
     coursesToEnroll: [],
     waitlistCourses: [],
   });
+
+  const {
+    activeSchedule,
+    setActiveSchedule,
+    scheduledClasses,
+    setScheduledClasses,
+    enrolledClasses,
+    setEnrolledClasses,
+    waitlistedClasses,
+    setWaitlistedClasses,
+  } = useSchedule();
 
   // ------------------- modal states -------------------
   const [waitlistModal, setWaitlistModal] = useState({
@@ -89,18 +95,6 @@ export default function ClassSearchPage() {
   const [prereqModal, setPrereqModal] = useState({
     isOpen: false,
     course: null,
-  });
-
-  const [enrolledClasses, setEnrolledClasses] = useState({
-    1: [],
-    2: [],
-    3: [],
-  });
-
-  const [waitlistedClasses, setWaitlistedClasses] = useState({
-    1: [],
-    2: [],
-    3: [],
   });
 
   const [selectedCourseIds, setSelectedCourseIds] = useState([]);
@@ -649,7 +643,7 @@ export default function ClassSearchPage() {
       <div className="class-search-layout">
         <Sidebar
           activeItem="Academics: Enrollment"
-          activeSubtab="Class Search"
+          activeSubtab="Add/Drop Classes"
           defaultEnrollmentOpen={true}
         />
 
@@ -903,78 +897,11 @@ export default function ClassSearchPage() {
                 </div>
               )}
 
-              <div className="calendar-shell">
-                <div className="calendar-header-row">
-                  <div className="calendar-time-header"></div>
-                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
-                    <div key={day} className="calendar-day-header">
-                      {day}
-                    </div>
-                  ))}
-                </div>
-                <div className="calendar-scroll">
-                  <div className="calendar-grid">
-                    {Array.from({ length: calendarEndHour - calendarStartHour + 1 }, (_, i) => {
-                      const hour = calendarStartHour + i;
-                      return (
-                        <div key={hour} className="calendar-hour-row">
-                          <div className="calendar-time-label">
-                            {String(hour).padStart(2, "0")}:00
-                          </div>
-                          {Array.from({ length: dayColumnCount }, (_, col) => (
-                            <div key={col} className="calendar-cell"></div>
-                          ))}
-                        </div>
-                      );
-                    })}
-
-                    <div className="calendar-events-layer">
-                      {eventsWithConflicts.map((event) => {
-                        const top =
-                          ((event.startMinutes - calendarStartHour * 60) / 60) * hourHeight;
-
-                        const height = ((event.endMinutes - event.startMinutes) / 60) * hourHeight;
-
-                        const left = `calc(${timeColumnWidth}px + (${event.column} * ((100% - ${timeColumnWidth}px) / ${dayColumnCount})))`;
-                        const width = `calc((100% - ${timeColumnWidth}px) / ${dayColumnCount})`;
-
-                        return (
-                          <div
-                            key={event.id}
-                            className={`calendar-event-card 
-                              ${
-                                event.isEnrolled
-                                  ? "calendar-event-card--enrolled"
-                                  : event.hasConflict
-                                    ? "calendar-event-card--conflict"
-                                    : event.isWaitlisted
-                                      ? "calendar-event-card--waitlisted"
-                                      : ""
-                              }`}
-                            style={{
-                              top: `${top}px`,
-                              left,
-                              width,
-                              height: `${height}px`,
-                            }}>
-                            <div className="calendar-event-code">{event.course.code}</div>
-                            <div className="calendar-event-instructor">
-                              {event.course.instructor}
-                            </div>
-                            <div className="calendar-event-room">{event.course.location}</div>
-                            {event.isEnrolled && (
-                              <div className="calendar-event-enrolled-badge">Enrolled</div>
-                            )}
-                            {event.isWaitlisted && (
-                              <div className="calendar-event-waitlisted-badge">Waitlisted</div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ScheduleCalendar
+                courses={scheduledClasses[activeSchedule]}
+                isCourseEnrolled={isCourseEnrolled}
+                isCourseWaitlisted={isCourseWaitlisted}
+              />
             </div>
           </div>
         </main>
