@@ -41,7 +41,7 @@ export default function DropConfirmModal({ isOpen, onClose, onConfirm, courses =
         )}
 
         <div className="modal-actions">
-          <button className="modal-btn" onClick={onClose}>
+          <button className="modal-btn modal-btn--secondary" onClick={onClose}>
             Cancel
           </button>
           <button className="modal-btn modal-btn--danger" onClick={onConfirm}>

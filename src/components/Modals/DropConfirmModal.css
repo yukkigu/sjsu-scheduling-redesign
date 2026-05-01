@@ -22,6 +22,8 @@
   border-radius: 10px;
   padding: 10px 12px;
   color: #7a1e1e;
+  min-width: 400px;
+  width: 100%;
 }
 
 .modal-btn--danger {
@@ -31,4 +33,10 @@
 
 .modal-btn--danger:hover {
   background: #9c4f4f;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
 }

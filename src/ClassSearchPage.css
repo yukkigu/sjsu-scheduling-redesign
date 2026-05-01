@@ -458,7 +458,7 @@
 
 .calendar-time-label {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding-top: 8px;
   font-size: 14px;
@@ -485,7 +485,13 @@
 }
 .calendar-event-card {
   position: absolute;
-  background: #dce4f2;
+  background: repeating-linear-gradient(
+    135deg,
+    #e8edf5 0px,
+    #e8edf5 12px,
+    #e2e8f2 12px,
+    #e2e8f2 24px
+  );
   border: 1px solid #aebcd8;
   border-radius: 8px;
   padding: 8px 10px;
@@ -510,7 +516,14 @@
 }
 
 .calendar-event-card--conflict {
-  background: #f5c6c6 !important;
+  /* background: #f5c6c6 !important; */
+  background: repeating-linear-gradient(
+    135deg,
+    #fae4e4 0px,
+    #fae4e4 12px,
+    #f3d4d4 12px,
+    #f3d4d4 24px
+  );
   border-color: #c85f5f !important;
 }
 
@@ -538,7 +551,25 @@
 
   background: rgba(255, 255, 255, 0.25);
   color: white;
-  font-size: 10px;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.calendar-event-card--waitlisted {
+  background: #f2ea8b !important;
+  border-color: #948f54 !important;
+}
+
+.calendar-event-waitlisted-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  background: rgba(160, 151, 95, 0.25);
+  color: rgb(85, 85, 84);
+  font-size: 11px;
   padding: 2px 6px;
   border-radius: 6px;
   font-weight: 600;

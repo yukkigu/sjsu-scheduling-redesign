@@ -74,7 +74,7 @@ export default function ClassSearchPage() {
   // ------------------- modal states -------------------
   const [waitlistModal, setWaitlistModal] = useState({
     isOpen: false,
-    course: null,
+    courses: [],
   });
 
   const [prereqModal, setPrereqModal] = useState({
@@ -98,6 +98,7 @@ export default function ClassSearchPage() {
   const [enrollSuccessModal, setEnrollSuccessModal] = useState({
     isOpen: false,
     enrolledCourses: [],
+    waitlistedCourses: [],
   });
 
   const [classConflictModal, setClassConflictModal] = useState({
@@ -206,6 +207,7 @@ export default function ClassSearchPage() {
     const meetingDays = parseMeetingDays(course.times);
     const { startMinutes, endMinutes } = parseTimeRange(course.times);
     const isEnrolled = enrolledClasses[activeSchedule].some((c) => c.id === course.id);
+    const isWaitlisted = waitlistedClasses[activeSchedule].some((c) => c.id === course.id);
 
     return meetingDays.map((day) => ({
       id: `${course.id}-${day}`,
@@ -215,6 +217,7 @@ export default function ClassSearchPage() {
       startMinutes,
       endMinutes,
       isEnrolled,
+      isWaitlisted,
     }));
   });
 
@@ -223,31 +226,31 @@ export default function ClassSearchPage() {
     return a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes;
   };
 
-  const hasScheduleConflict = (courses) => {
-    const events = courses.flatMap((course) => {
-      const meetingDays = parseMeetingDays(course.times);
-      const { startMinutes, endMinutes } = parseTimeRange(course.times);
+  // const hasScheduleConflict = (courses) => {
+  //   const events = courses.flatMap((course) => {
+  //     const meetingDays = parseMeetingDays(course.times);
+  //     const { startMinutes, endMinutes } = parseTimeRange(course.times);
 
-      return meetingDays.map((day) => ({
-        day,
-        startMinutes,
-        endMinutes,
-      }));
-    });
+  //     return meetingDays.map((day) => ({
+  //       day,
+  //       startMinutes,
+  //       endMinutes,
+  //     }));
+  //   });
 
-    for (let i = 0; i < events.length; i++) {
-      for (let j = i + 1; j < events.length; j++) {
-        if (eventsConflict(events[i], events[j])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
+  //   for (let i = 0; i < events.length; i++) {
+  //     for (let j = i + 1; j < events.length; j++) {
+  //       if (eventsConflict(events[i], events[j])) {
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // };
 
   const eventsWithConflicts = scheduledEvents.map((event, index) => {
     const hasConflict = scheduledEvents.some(
-      (other, otherIndex) => otherIndex < index && eventsConflict(event, other),
+      (other, otherIndex) => otherIndex !== index && eventsConflict(event, other),
     );
     return { ...event, hasConflict };
   });
@@ -403,7 +406,7 @@ export default function ClassSearchPage() {
 
       setWaitlistModal({
         isOpen: true,
-        course: waitlistCourses[0],
+        courses: waitlistCourses,
       });
       return;
     }
@@ -417,6 +420,7 @@ export default function ClassSearchPage() {
     setEnrollSuccessModal({
       isOpen: true,
       enrolledCourses: regularCourses,
+      waitlistedCourses: [],
     });
   };
 
@@ -455,7 +459,7 @@ export default function ClassSearchPage() {
 
       setWaitlistModal({
         isOpen: true,
-        course: waitlistCourses[0],
+        courses: waitlistCourses,
       });
       return;
     }
@@ -469,6 +473,7 @@ export default function ClassSearchPage() {
     setEnrollSuccessModal({
       isOpen: true,
       enrolledCourses: regularCourses,
+      waitlistedCourses: [],
     });
   };
 
@@ -498,12 +503,15 @@ export default function ClassSearchPage() {
     }
 
     setSelectedCourseIds([]);
+
+    setWaitlistModal({ isOpen: false, courses: [] });
+
     setEnrollSuccessModal({
       isOpen: true,
       enrolledCourses: coursesToEnroll,
+      waitlistedCourses: waitlistCourses,
     });
 
-    setWaitlistModal({ isOpen: false, course: null });
     setPendingWaitlistEnrollment({
       coursesToEnroll: [],
       waitlistCourses: [],
@@ -548,11 +556,11 @@ export default function ClassSearchPage() {
       <WaitlistModal
         isOpen={waitlistModal.isOpen}
         onClose={() => {
-          setWaitlistModal({ isOpen: false, course: null });
+          setWaitlistModal({ isOpen: false, courses: [] });
           setPendingWaitlistEnrollment({ coursesToEnroll: [], waitlistCourses: [] });
         }}
         onConfirm={handleJoinWaitlistAndEnroll}
-        course={waitlistModal.course}
+        courses={waitlistModal.courses}
       />
 
       <PrereqModal
@@ -563,8 +571,15 @@ export default function ClassSearchPage() {
 
       <EnrollSuccessModal
         isOpen={enrollSuccessModal.isOpen}
-        onClose={() => setEnrollSuccessModal({ isOpen: false, enrolledCourses: [] })}
+        onClose={() =>
+          setEnrollSuccessModal({
+            isOpen: false,
+            enrolledCourses: [],
+            waitlistedCourses: [],
+          })
+        }
         enrolledCourses={enrollSuccessModal.enrolledCourses}
+        waitlistedCourses={enrollSuccessModal.waitlistedCourses}
       />
 
       <ClassConflictModal
@@ -751,7 +766,7 @@ export default function ClassSearchPage() {
                       })}
                     </>
                   )}
-                  {enrolledScheduledCourses.length > 0 && addedScheduledCourses.length > 0 && (
+                  {enrolledScheduledCourses.length > 0 && (
                     <div className="schedule-course-divider"></div>
                   )}
 
@@ -762,23 +777,26 @@ export default function ClassSearchPage() {
                         const isExpanded = expandedScheduledCourseId === course.id;
 
                         return (
-                          <ClassCard
-                            key={course.id}
-                            course={course}
-                            variant="schedule"
-                            isExpanded={isExpanded}
-                            onToggle={() =>
-                              setExpandedScheduledCourseId(isExpanded ? null : course.id)
-                            }
-                            isCourseAdded={isCourseAdded}
-                            handleToggleCourse={handleToggleCourse}
-                            isCourseEnrolled={isCourseEnrolled}
-                            isCourseWaitlisted={isCourseWaitlisted}
-                            getCourseDisplayStatus={getCourseDisplayStatus}
-                            handleDropCourse={handleDropCourse}
-                            showCheckbox={false}
-                          />
+                          <>
+                            <ClassCard
+                              key={course.id}
+                              course={course}
+                              variant="schedule"
+                              isExpanded={isExpanded}
+                              onToggle={() =>
+                                setExpandedScheduledCourseId(isExpanded ? null : course.id)
+                              }
+                              isCourseAdded={isCourseAdded}
+                              handleToggleCourse={handleToggleCourse}
+                              isCourseEnrolled={isCourseEnrolled}
+                              isCourseWaitlisted={isCourseWaitlisted}
+                              getCourseDisplayStatus={getCourseDisplayStatus}
+                              handleDropCourse={handleDropCourse}
+                              showCheckbox={false}
+                            />
+                          </>
                         );
+                        <div className="schedule-course-divider"></div>;
                       })}
                     </>
                   )}
@@ -879,7 +897,9 @@ export default function ClassSearchPage() {
                                   ? "calendar-event-card--enrolled"
                                   : event.hasConflict
                                     ? "calendar-event-card--conflict"
-                                    : ""
+                                    : event.isWaitlisted
+                                      ? "calendar-event-card--waitlisted"
+                                      : ""
                               }`}
                             style={{
                               top: `${top}px`,
@@ -894,6 +914,9 @@ export default function ClassSearchPage() {
                             <div className="calendar-event-room">{event.course.location}</div>
                             {event.isEnrolled && (
                               <div className="calendar-event-enrolled-badge">Enrolled</div>
+                            )}
+                            {event.isWaitlisted && (
+                              <div className="calendar-event-waitlisted-badge">Waitlisted</div>
                             )}
                           </div>
                         );

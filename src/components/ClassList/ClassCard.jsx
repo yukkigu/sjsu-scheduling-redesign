@@ -148,16 +148,19 @@ export default function ClassCard({
 
               <div className="class-result-actions">
                 {/* Search list button */}
-                {variant === "search" && !isEnrolled && course.status !== "Closed" && (
-                  <button
-                    className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleCourse(course);
-                    }}>
-                    {isCourseAdded(course.id) ? "Remove from Schedule" : "Add to Schedule"}
-                  </button>
-                )}
+                {variant === "search" &&
+                  !isEnrolled &&
+                  !isWaitlisted &&
+                  course.status !== "Closed" && (
+                    <button
+                      className={`add-class-btn ${isCourseAdded(course.id) ? "remove" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleCourse(course);
+                      }}>
+                      {isCourseAdded(course.id) ? "Remove from Schedule" : "Add to Schedule"}
+                    </button>
+                  )}
 
                 {/* Schedule list button (only for enrolled and waitlisted classes) */}
                 {variant === "schedule" && isCommittedCourse && (

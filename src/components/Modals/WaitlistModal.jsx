@@ -3,7 +3,7 @@ import "./WaitlistModal.css";
 import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-export default function WaitlistModal({ isOpen, onClose, onConfirm, course }) {
+export default function WaitlistModal({ isOpen, onClose, onConfirm, courses = [] }) {
   const [waitlisted, setWaitlisted] = useState(false);
 
   if (!isOpen) return null;
@@ -30,10 +30,25 @@ export default function WaitlistModal({ isOpen, onClose, onConfirm, course }) {
             Added to Wait List
           </h2>
 
-          <p className="modal-body">
-            You have been added to the waitlist for{" "}
-            {course ? `${course.code} - ${course.title}` : "this class"}
-          </p>
+          <div className="modal-body">
+            {courses.length > 0 && (
+              <>
+                <span>
+                  The selected class(es) are currently full. Do you want to join the waitlist?
+                </span>
+
+                <div className="waitlist-list">
+                  {courses.map((course) => (
+                    <div key={course.id} className="waitlist-item">
+                      <span>
+                        {course.code} - {course.title}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
 
           <div className="modal-actions">
             <button className="modal-btn modal-btn--primary" onClick={handleClose}>
@@ -62,10 +77,20 @@ export default function WaitlistModal({ isOpen, onClose, onConfirm, course }) {
         </h2>
 
         <p className="modal-body">
-          {course
-            ? `${course.code} - ${course.title} is currently full.`
-            : "This class is currently full."}{" "}
-          Do you want to join the waitlist?
+          {courses.length > 0 && (
+            <>
+              <span>
+                The selected class(es) is currently full. Do you want to join the waitlist?
+              </span>
+              {courses.map((course) => (
+                <div key={course.id} className="waitlist-item">
+                  <span>
+                    {course.code} - {course.title}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
         </p>
 
         <div className="modal-actions modal-actions--split">

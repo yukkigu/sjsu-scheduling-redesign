@@ -7,3 +7,18 @@
 .modal-icon--success {
   color: #5a9971 !important;
 }
+
+.waitlist-item {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f4f4f4;
+  border: 1px solid #dde2ee;
+  border-radius: 8px;
+}
+
+.waitlist-item span {
+  display: block;
+  text-align: left;
+  padding: 0 12px;
+  color: #28344a;
+}
