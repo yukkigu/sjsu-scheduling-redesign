@@ -29,7 +29,8 @@ export default function ClassSearchPage() {
   // ------------------- search filters states -------------------
   const [term, setTerm] = useState("Spring 2026");
   const [subject, setSubject] = useState("");
-  const [courseFilterType, setCourseFilterType] = useState("Contains");
+  const [courseNumber, setCourseNumber] = useState("");
+  const [courseFilterType, setCourseFilterType] = useState("");
   const [courseCareer, setCourseCareer] = useState("");
 
   // additional criteria states
@@ -38,11 +39,15 @@ export default function ClassSearchPage() {
   const times = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
   const [showAdditionalCriteria, setShowAdditionalCriteria] = useState(false);
+  const [selectedDays, setSelectedDays] = useState([]);
   const [modeOfInstruction, setModeOfInstruction] = useState("");
-  const [classTimeType, setClassTimeType] = useState("Select");
+  const [classTimeType, setClassTimeType] = useState("");
   const [classTimeValue, setClassTimeValue] = useState("");
+  const [instructorLastName, setInstructorLastName] = useState("");
+
   const [searchResults, setSearchResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+
   const additionalCriteriaProps = {
     modeOfInstructionOptions,
     modeOfInstruction,
@@ -53,6 +58,10 @@ export default function ClassSearchPage() {
     times,
     classTimeValue,
     setClassTimeValue,
+    selectedDays,
+    setSelectedDays,
+    instructorLastName,
+    setInstructorLastName,
   };
   // --------------------------------------------------------------
 
@@ -116,6 +125,7 @@ export default function ClassSearchPage() {
   const termOptions = ["Spring 2026", "Fall 2026", "Summer 2026", "Spring 2027"];
 
   const subjectOptions = [
+    "Select",
     "Art",
     "Accouting",
     "Aerospace Engineering",
@@ -196,6 +206,12 @@ export default function ClassSearchPage() {
     };
   };
 
+  const dropdownTimeToMinutes = (timeStr) => {
+    if (!timeStr) return null;
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
   // calendar absolute positioning constants for overlaying courses on the schedule table
   const calendarStartHour = 6;
   const calendarEndHour = 22;
@@ -225,28 +241,6 @@ export default function ClassSearchPage() {
     if (a.day !== b.day) return false;
     return a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes;
   };
-
-  // const hasScheduleConflict = (courses) => {
-  //   const events = courses.flatMap((course) => {
-  //     const meetingDays = parseMeetingDays(course.times);
-  //     const { startMinutes, endMinutes } = parseTimeRange(course.times);
-
-  //     return meetingDays.map((day) => ({
-  //       day,
-  //       startMinutes,
-  //       endMinutes,
-  //     }));
-  //   });
-
-  //   for (let i = 0; i < events.length; i++) {
-  //     for (let j = i + 1; j < events.length; j++) {
-  //       if (eventsConflict(events[i], events[j])) {
-  //         return true;
-  //       }
-  //     }
-  //   }
-  //   return false;
-  // };
 
   const eventsWithConflicts = scheduledEvents.map((event, index) => {
     const hasConflict = scheduledEvents.some(
@@ -524,7 +518,59 @@ export default function ClassSearchPage() {
       const matchesSubject = !subject || course.subject === subject;
       const matchesCareer = !courseCareer || course.career === courseCareer;
 
-      return matchesTerm && matchesSubject && matchesCareer;
+      const matchesCourseNumber =
+        !courseNumber ||
+        (course.code &&
+          (() => {
+            const codeLower = course.code.toLowerCase();
+            const queryLower = courseNumber.toLowerCase();
+
+            if (courseFilterType === "Is Exactly") {
+              return codeLower === queryLower;
+            }
+
+            return codeLower.includes(queryLower);
+          })());
+
+      const matchesInstructionMode =
+        !modeOfInstruction || course.instructionMode === modeOfInstruction;
+
+      const matchesInstructor =
+        !instructorLastName ||
+        course.instructor.toLowerCase().includes(instructorLastName.toLowerCase());
+
+      const courseDays = parseMeetingDays(course.times);
+      const matchesDays =
+        selectedDays.length === 0 || selectedDays.every((day) => courseDays.includes(day));
+
+      const { startMinutes } = parseTimeRange(course.times);
+      const selectedTimeMinutes = classTimeValue
+        ? parseTimeRange(`X ${classTimeValue}-00:00`).startMinutes
+        : null;
+
+      let matchesClassTime = true;
+      if (classTimeType && classTimeValue) {
+        const selectedMinutes = dropdownTimeToMinutes(classTimeValue);
+
+        if (classTimeType === "Before") {
+          matchesClassTime = startMinutes < selectedMinutes;
+        } else if (classTimeType === "After") {
+          matchesClassTime = startMinutes > selectedMinutes;
+        } else if (classTimeType === "At Exactly") {
+          matchesClassTime = startMinutes === selectedMinutes;
+        }
+      }
+
+      return (
+        matchesTerm &&
+        matchesSubject &&
+        matchesCareer &&
+        matchesCourseNumber &&
+        matchesInstructionMode &&
+        matchesInstructor &&
+        matchesDays &&
+        matchesClassTime
+      );
     });
 
     setSearchResults(filtered);
@@ -627,17 +673,21 @@ export default function ClassSearchPage() {
                 <CustomDropdown
                   options={subjectOptions}
                   value={subject}
-                  onChange={setSubject}
+                  onChange={(value) => setSubject(value === "Select" ? "" : value)}
                   placeholder="Select Subject"
                 />
 
                 <label className="class-search-label">Course Number Filter</label>
                 <div className="class-search-course-filter-wrap">
-                  <input className="class-search-course-input" />
+                  <input
+                    className="class-search-course-input"
+                    value={courseNumber}
+                    onChange={(e) => setCourseNumber(e.target.value)}
+                  />
                   <CustomDropdown
                     options={courseFilterOptions}
                     value={courseFilterType}
-                    onChange={setCourseFilterType}
+                    onChange={(value) => setCourseFilterType(value === "Select" ? "" : value)}
                     placeholder="Contains"
                   />
                 </div>
@@ -646,7 +696,7 @@ export default function ClassSearchPage() {
                 <CustomDropdown
                   options={courseCareerOptions}
                   value={courseCareer}
-                  onChange={setCourseCareer}
+                  onChange={(value) => setCourseCareer(value === "Select" ? "" : value)}
                   placeholder="Select Course Career"
                 />
               </div>
@@ -796,8 +846,8 @@ export default function ClassSearchPage() {
                             />
                           </>
                         );
-                        <div className="schedule-course-divider"></div>;
                       })}
+                      <div className="schedule-course-divider"></div>
                     </>
                   )}
 
